@@ -11,7 +11,7 @@ import threading
 import time
 
 from buttons import *
-import aifunctions
+# import aifunctions
 import helperfunctions
 import mediainfo
 import guess
@@ -22,8 +22,8 @@ import tictactoe
 
 
 # env
-bot_token = os.environ.get("TOKEN", "") 
-api_hash = os.environ.get("HASH", "") 
+bot_token = os.environ.get("TOKEN", "")
+api_hash = os.environ.get("HASH", "")
 api_id = os.environ.get("ID", "")
 
 
@@ -308,7 +308,7 @@ def follow(message,inputt,new,old,oldmessage):
     # deleting message    
     app.delete_messages(message.chat.id,message_ids=oldmessage.id)
 
-
+'''
 # negative to positive
 def negetivetopostive(message,oldmessage):
     file = app.download_media(message)
@@ -402,7 +402,7 @@ def genratevideos(message,prompt):
     app.send_video(message.chat.id, video=file, reply_to_message_id=message.id) #,caption=f"COGVIDEO : {prompt}")
     os.remove(file)
     app.delete_messages(message.chat.id,message_ids=msg.id)
-
+'''
 
 # delete msg
 def dltmsg(umsg,rmsg,sec=15):
@@ -602,7 +602,7 @@ def runpro(message,oldm):
     else:
         app.send_message(message.chat.id,"__At this time Running only supports from PY Files__", reply_to_message_id=message.id)
 
-
+'''
 # bg remove
 def bgremove(message,oldm):
     file = app.download_media(message)
@@ -611,7 +611,7 @@ def bgremove(message,oldm):
     app.send_document(message.chat.id, ofile, reply_to_message_id=message.id)
     app.delete_messages(message.chat.id,message_ids=oldm.id)
     os.remove(ofile)
-
+'''
 
 # scanning
 def scan(message,oldm):
@@ -648,7 +648,7 @@ def makefile(message,mtext,oldmessage):
     app.delete_messages(message.chat.id,message_ids=oldmessage.id)
     os.remove(firstline)      	    
 
-
+'''
 # transcript speech to text
 def transcript(message,oldmessage):
     file = app.download_media(message)
@@ -716,7 +716,7 @@ def increaseres(message,oldmessage):
         
     app.delete_messages(message.chat.id,message_ids=oldmessage.id)
     os.remove(inputt)
-
+'''
 
 # renaming
 def rname(message,newname,oldm):
@@ -741,7 +741,7 @@ def saverec(message):
     msg  = app.get_messages(username,msgid)
     app.copy_message(message.chat.id, msg.chat.id, msg.id)
 
-
+'''
 # AI chat
 def handleAIChat(message):
     hash = str(message.chat.id)
@@ -792,7 +792,7 @@ def other(message):
     # AI chat
     else:
         handleAIChat(message)
-
+'''
 # download with progress
 def down(message):
 
@@ -923,7 +923,21 @@ def start(client: pyrogram.client.Client, message: pyrogram.types.messages_and_m
 @app.on_message(filters.command(['help']))
 def help(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     oldm = app.send_message(message.chat.id,
-        "__Available Commands__\n\n**/start - To Check Availabe Conversions\n/help - Help Message\n/detail - Supported Extensions\n/imagegen - Text to Image\n/musicgen - Text to Music\n/3dgen - Text to 3D\n/bloom - AI Article Writter\n/cancel - To Cancel\n/rename - To Rename File\n/read - To Read File\n/make - To Make File\n/guess - Bot will Guess\n/tictactoe - To Play Tic Tac Toe\n/source - Github Source Code\n**", reply_to_message_id=message.id)
+        "__Available Commands__\n\n"
+        "**/start - To Check Availabe Conversions\n"
+        "/help - Help Message\n"
+        "/detail - Supported Extensions\n"
+        # "/imagegen - Text to Image\n"
+        # "/musicgen - Text to Music\n"
+        # "/3dgen - Text to 3D\n"
+        # "/bloom - AI Article Writter\n"
+        "/cancel - To Cancel\n"
+        "/rename - To Rename File\n"
+        "/read - To Read File\n"
+        "/make - To Make File\n"
+        # "/guess - Bot will Guess\n"
+        # "/tictactoe - To Play Tic Tac Toe\n"
+        "/source - Github Source Code\n**", reply_to_message_id=message.id)
     dm = threading.Thread(target=lambda:dltmsg(message,oldm),daemon=True)
     dm.start() 
 
@@ -964,9 +978,9 @@ def cancel(client: pyrogram.client.Client, message: pyrogram.types.messages_and_
         app.delete_messages(message.chat.id,message_ids=nmessage.id+1)
         app.send_message(message.chat.id,"__Your job was **Canceled**__",reply_markup=ReplyKeyboardRemove(), reply_to_message_id=message.id)
     else:
-        app.send_message(message.chat.id,"__No job to Cancel__", reply_to_message_id=message.id)     
+        app.send_message(message.chat.id,"__No job to Cancel__", reply_to_message_id=message.id)
 
-
+'''
 # imagen command
 @app.on_message(filters.command(["imagegen"]))
 def getpompt(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
@@ -999,7 +1013,7 @@ def getpompt(client: pyrogram.client.Client, message: pyrogram.types.messages_an
 	msg = app.send_message(message.chat.id,"__Prompt received and Request is sent. Waiting time is 1 minute__", reply_to_message_id=message.id)
 	mai = threading.Thread(target=lambda:genratemusic(message,prompt,msg),daemon=True)
 	mai.start()
-
+'''
 
 # read command
 @app.on_message(filters.command(['read']))
@@ -1034,7 +1048,7 @@ def makecmd(client: pyrogram.client.Client, message: pyrogram.types.messages_and
     mf = threading.Thread(target=lambda:makefile(message,text,oldm),daemon=True)
     mf.start()
 
-
+'''
 # Point E
 @app.on_message(filters.command(["3dgen"]))
 def send_gpt(client: pyrogram.client.Client,message: pyrogram.types.messages_and_media.message.Message,):
@@ -1080,7 +1094,7 @@ def startG(client: pyrogram.client.Client, message: pyrogram.types.messages_and_
                     InlineKeyboardButton( text='Yes', callback_data='G ready'),
                     InlineKeyboardButton( text='No', callback_data='G not')
                 ]]))
-    
+ 
 
 # bloom 
 @app.on_message(filters.command("bloom"))
@@ -1095,7 +1109,7 @@ def bloomcmd(client: pyrogram.client.Client, message: pyrogram.types.messages_an
     msg = message.reply_text("__Blooming...__", reply_to_message_id=message.id)
     blm = threading.Thread(target=lambda:handelbloom(para,message,msg),daemon=True)
     blm.start()
-
+'''
 
 # callback
 @app.on_callback_query()
@@ -1113,13 +1127,19 @@ def documnet(client: pyrogram.client.Client, message: pyrogram.types.messages_an
     # VID / AUD
     if message.document.file_name.upper().endswith(VIDAUD):
         app.send_message(message.chat.id,
-                         f'__Detected Extension:__ **{dext}** 📹 / 🔊\n__Now send extension to Convert to...__\n\n--**Available formats**-- \n\n__{VA_TEXT}__\n\n{message.from_user.mention} __choose or click /cancel to Cancel or use /rename  to  Rename__',
+                         f'__Detected Extension:__ **{dext}** 📹 / 🔊\n__Now send extension to Convert to...__\n\n'
+                         f'--**Available formats**-- \n\n__{VA_TEXT}__\n\n{message.from_user.mention} __choose or '
+                         f'click /cancel to Cancel or use /rename  to  Rename__',
                          reply_markup=VAboard, reply_to_message_id=message.id)
 
     # IMG
     elif message.document.file_name.upper().endswith(IMG):
+        # f'**SPECIAL** 🎁\n__Colorize, Positive, Upscale & Scan__\n\n'
         app.send_message(message.chat.id,
-                         f'__Detected Extension:__ **{dext}** 📷\n__Now send extension to Convert to...__\n\n--**Available formats**-- \n\n__{IMG_TEXT}__\n\n**SPECIAL** 🎁\n__Colorize, Positive, Upscale & Scan__\n\n{message.from_user.mention} __choose or click /cancel to Cancel or use /rename  to  Rename__',
+                         f'__Detected Extension:__ **{dext}** 📷\n__Now send extension to Convert to...__\n\n'
+                         f'--**Available formats**-- \n\n__{IMG_TEXT}__\n\n'
+                         f'{message.from_user.mention} __choose or click /cancel to Cancel or use '
+                         f'/rename  to  Rename__',
                          reply_markup=IMGboard, reply_to_message_id=message.id)
 
     # LBW
@@ -1255,8 +1275,11 @@ def voice(client: pyrogram.client.Client, message: pyrogram.types.messages_and_m
 @app.on_message(filters.photo)
 def photo(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     saveMsg(message, "PHOTO")
+    # f'**SPECIAL** 🎁\n__Colorize, Positive, Upscale & Scan__\n\n{message.from_user.mention} __choose '
     app.send_message(message.chat.id,
-                     f'__Detected Extension:__ **JPG** 📷\n__Now send extension to Convert to...__\n\n--**Available formats**-- \n\n__{IMG_TEXT}__\n\n**SPECIAL** 🎁\n__Colorize, Positive, Upscale & Scan__\n\n{message.from_user.mention} __choose or click /cancel to Cancel or use /rename  to  Rename__',
+                     f'__Detected Extension:__ **JPG** 📷\n__Now send extension to Convert to...__\n\n'
+                     f'--**Available formats**-- \n\n__{IMG_TEXT}__\n\n'
+                     f'or click /cancel to Cancel or use /rename  to  Rename__',
                      reply_markup=IMGboard, reply_to_message_id=message.id)
 
 
@@ -1298,11 +1321,13 @@ def text(client: pyrogram.client.Client, message: pyrogram.types.messages_and_me
         app.delete_messages(message.chat.id,message_ids=nmessage.id+1)
 
         if "COLOR" == message.text:
+            return
             oldm = app.send_message(message.chat.id,'__Processing__',reply_markup=ReplyKeyboardRemove(), reply_to_message_id=nmessage.id) 
             col = threading.Thread(target=lambda:colorizeimage(nmessage,oldm),daemon=True)
             col.start()
 
         elif "POSITIVE" == message.text:
+            return
             oldm = app.send_message(message.chat.id,'__Processing__',reply_markup=ReplyKeyboardRemove(), reply_to_message_id=nmessage.id) 
             pos = threading.Thread(target=lambda:negetivetopostive(nmessage,oldm),daemon=True)
             pos.start() 
@@ -1328,16 +1353,19 @@ def text(client: pyrogram.client.Client, message: pyrogram.types.messages_and_me
             sv.start()
 
         elif "SpeechToText" == message.text:
+            return
             oldm = app.send_message(message.chat.id,'__Transcripting, takes long time for Long Files__',reply_markup=ReplyKeyboardRemove(), reply_to_message_id=nmessage.id)
             stt = threading.Thread(target=lambda:transcript(nmessage,oldm),daemon=True)
             stt.start()
 
         elif "TextToSpeech" == message.text:
+            return
             oldm = app.send_message(message.chat.id,'__Generating Speech__',reply_markup=ReplyKeyboardRemove(), reply_to_message_id=nmessage.id)
             tts = threading.Thread(target=lambda:speak(nmessage,oldm),daemon=True)
             tts.start()
 
         elif "UPSCALE" == message.text:
+            return
             oldm = app.send_message(message.chat.id,'__Upscaling Your Image__',reply_markup=ReplyKeyboardRemove(), reply_to_message_id=nmessage.id)
             upscl = threading.Thread(target=lambda:increaseres(nmessage,oldm),daemon=True)
             upscl.start()
@@ -1363,6 +1391,7 @@ def text(client: pyrogram.client.Client, message: pyrogram.types.messages_and_me
             rpro.start()
 
         elif "BG REMOVE" == message.text:
+            return
             oldm = app.send_message(message.chat.id,'__Background Removing__',reply_markup=ReplyKeyboardRemove(), reply_to_message_id=nmessage.id)
             bgrm = threading.Thread(target=lambda:bgremove(nmessage,oldm),daemon=True)
             bgrm.start()

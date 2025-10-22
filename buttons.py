@@ -41,7 +41,7 @@ ReplyButton('WEBM'),
 ReplyButton('WMV'),
 ReplyButton('SENDVID'),
 ReplyButton('SENDDOC'),
-ReplyButton('SpeechToText')
+# ReplyButton('SpeechToText')
             )    
 
 IMGboard = ReplyKeyboard(row_width=3,one_time_keyboard=True,placeholder="convert to",resize_keyboard=True,selective=True)
@@ -56,11 +56,11 @@ ReplyButton('JPEG'),
 ReplyButton('JPG'),
 ReplyButton('PNG'),
 ReplyButton('SVG'),
-ReplyButton('COLOR'),
-ReplyButton('POSITIVE'),
-ReplyButton('UPSCALE'),
-ReplyButton('SCAN'),
-ReplyButton('BG REMOVE'),
+# ReplyButton('COLOR'),
+# ReplyButton('POSITIVE'),
+# ReplyButton('UPSCALE'),
+#ReplyButton('SCAN'),
+# ReplyButton('BG REMOVE'),
 ReplyButton('SENDPHOTO'),
 ReplyButton('SENDDOC')
             )
@@ -79,7 +79,7 @@ ReplyButton('WPS'),
 ReplyButton('OTT'),
 ReplyButton('TXT'),
 ReplyButton('READ'),
-ReplyButton('TextToSpeech')
+# ReplyButton('TextToSpeech')
             )
 
 LBIboard = ReplyKeyboard(row_width=3,one_time_keyboard=True,placeholder="convert to",resize_keyboard=True,selective=True)
@@ -214,6 +214,6 @@ START_TEXT = f'**Images** 📷 \n__{IMG_TEXT}__\n\n\
 **Archives** 🗄 \n__{ARC_TEXT}__\n\n\
 **Subtitles** 🗯️ \n__{SUB_TEXT}__\n\n\
 **Programming Languages** 👨‍💻 \n__{PRO_TEXT}__\n\n\
-**3D Files** 💠 \n__{T3D_TEXT}__\n\n\
-**Special** 🎁 \n__Colorize, Positive, Upscale, Text-to-Speech, Speech-to-Text, AI Image, Chat with AI, AI Article Writter, Text-to-3D, TEXT-to-MUSIC, BG REMOVE, Scan, Compile & Run__\n\n\
-**Extra** ➕  \n__Play TicTacToe, Guess Game, Save Restricted Content, Torrent <-> Magnet, Time or Date, Maths & Base64__'
+**3D Files** 💠 \n__{T3D_TEXT}__'
+#\n\n\**Special** 🎁 \n__Colorize, Positive, Upscale, Text-to-Speech, Speech-to-Text, AI Image, Chat with AI, AI Article Writter, Text-to-3D, TEXT-to-MUSIC, BG REMOVE, Scan, Compile & Run__\n\n\
+# **Extra** ➕  \n__Play TicTacToe, Guess Game, Save Restricted Content, Torrent <-> Magnet, Time or Date, Maths & Base64__'
