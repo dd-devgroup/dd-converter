@@ -1,22 +1,22 @@
 # File-Converter-Bot
 
-**A Telegram Bot that can convert Images, Videos, Audios, Fonts, Documents and Ebooks.**
+**Телеграм бот для конвертации изображений, видео, аудио, шрифтов, документов и электронных книг.**
 
-**_See the Bot in Action [@FilesConvertRobot](https://t.me/filesconvertrobot)_**
-
----
-
-## Variables
-- `HASH` **_Your API Hash from my.telegram.org_**
-- `ID` **_Your API ID from my.telegram.org_**
-- `TOKEN` **_Your bot token from @BotFather_**
+**_Посмотреть бота в действии [@FilesConvertRobot](https://t.me/filesconvertrobot)_**
 
 ---
 
-## Run Locally
+## Переменные
+- `HASH` **_Ваш API Hash с my.telegram.org_**
+- `ID` **_Ваш API ID с my.telegram.org_**
+- `TOKEN` **_Токен вашего бота от @BotFather_**
 
-You have to install Docker or Docker Compose.
-Set the Environment Variables after the clone, or you can directly change it on [Line 26 - 28 in main.py](https://github.com/bipinkrish/File-Converter-Bot/blob/main/main.py?plain=1#L26) file
+---
+
+## Локальный запуск
+
+Необходимо установить Docker или Docker Compose.
+Установите переменные окружения после клонирования, или можете изменить их напрямую в [строках 26-28 в main.py](https://github.com/bipinkrish/File-Converter-Bot/blob/main/main.py?plain=1#L26)
 
 ```
 git clone https://github.com/bipinkrish/File-Converter-Bot.git
@@ -27,137 +27,136 @@ docker run File-Converter
 
 ---
 
-## Supported Formats
+## Поддерживаемые форматы
 
-**Images**:  *OCR, ICO, GIF, TIFF, BMP, WEBP, JP2, JPEG, JPG, PNG*
+**Изображения**: *OCR, ICO, GIF, TIFF, BMP, WEBP, JP2, JPEG, JPG, PNG*
 
-**Videos/Audios**:  *AIFF, AAC, M4A, OGA, WMA, FLAC, WAV, OPUS, OGG, MP3, MKV, MP4, MOV, AVI, M4B, VOB, DVD, WEBM, WMV*
+**Видео/Аудио**: *AIFF, AAC, M4A, OGA, WMA, FLAC, WAV, OPUS, OGG, MP3, MKV, MP4, MOV, AVI, M4B, VOB, DVD, WEBM, WMV*
 
-**Documents**: *ODT, DOC, DOCX, DOTX, PDF, XML, HTML, DOTM, WPS, OTT, TXT, ODP, PPT, PPTX, PPTM, PPSX, POTM, POTX, PPS, POT, ODG, OTP, XML, ODS, XLS, HTML, XLSX, XLSM, XLTM, XLTX, OTS, XML, CSV, XLM*
+**Документы**: *ODT, DOC, DOCX, DOTX, PDF, XML, HTML, DOTM, WPS, OTT, TXT, ODP, PPT, PPTX, PPTM, PPSX, POTM, POTX, PPS, POT, ODG, OTP, XML, ODS, XLS, HTML, XLSX, XLSM, XLTM, XLTX, OTS, XML, CSV, XLM*
 
-**Fonts**:  *SFD, BDF, FNT, OTF, PFA, PFB, TTC, TTF, UFO, WOFF*
+**Шрифты**: *SFD, BDF, FNT, OTF, PFA, PFB, TTC, TTF, UFO, WOFF*
 
-**eBooks**:  *EPUB, MOBI, AZW3, KFX, FB2, HTMLZ, LIT, LRF, PDB, PDF, TXT*
+**Электронные книги**: *EPUB, MOBI, AZW3, KFX, FB2, HTMLZ, LIT, LRF, PDB, PDF, TXT*
 
-**Archives**:  *ZIP, RAR, 7Z, TAR, XY, GZ, BZ*
+**Архивы**: *ZIP, RAR, 7Z, TAR, XY, GZ, BZ*
 
-**Subtitles**: *TTML, SCC, SRT, VTT*
+**Субтитры**: *TTML, SCC, SRT, VTT*
 
-**Programming Languages**: *C, CPP, PY, RS, JL, KT, NIM, DART, GO, JAVA, JS, TS, JAR*
+**Языки программирования**: *C, CPP, PY, RS, JL, KT, NIM, DART, GO, JAVA, JS, TS, JAR*
 
-**3D Files**: *CTM, PLY, STL, 3DS, DAE, OBJ, LWO, OFF, WRL*
-
----
-
-## Special Features
-
-**COLORIZE** - *Colorize your Old B&W Images*
-
-**TEXT-to-IMAGE** - *Get AI created Images from your Prompt*
-
-**POSITIVE** - *Convert your Negetive Images to Positive Images*
-
-**SPEECH-to-TEXT** - *Transcrpting from a Audio*
-
-**TEXT-to-SPEECH** - *Generate Speech from a Text File*
-
-**UPSCALE** - *Increase Resolution of a Image*
-
-**TEXT-to-VIDEO** - *Get AI created Videos from your Prompt*
-
-**SCAN** - *Get Scanned Data from QR Codes and Bar Codes*
-
-**COMPILE** - *Get Self-Contained Linux Executable*
-
-**RUN** - *Run a Python Program*
-
-**Chat with AI** - *Converse with The Sarcastic Chatbot*
-
-**AI Article Writter** - *Finish your Airticle with AI*
-
-**TEXT-to-MUSIC** - *Generate Music from a Text*
+**3D файлы**: *CTM, PLY, STL, 3DS, DAE, OBJ, LWO, OFF, WRL*
 
 ---
 
-## Extra Features
+## Специальные функции
 
-**Tic Tac Toe** - *Play a Tic Tac Toe with Bot or Players*
+**COLORIZE** - *Раскрашивание ваших старых черно-белых изображений*
 
-**Guess Game** - *Bot will Guess your Number*
+**TEXT-to-IMAGE** - *Создание изображений с помощью ИИ по вашему запросу*
 
-**SAVE RESTRICTED** - *Send a Resctircted Public Chat Post's Link, Bot will Send you that Post*
+**POSITIVE** - *Конвертация негативных изображений в позитивные*
 
-**Torrent <-> Magnet** - *Send Torrent File to get Magnet Link and Viceversa*
+**SPEECH-to-TEXT** - *Транскрибация аудио в текст*
 
-**Time and Date** - *Send 'Time' or 'Date' keyword to get Current Time & Date in Several TimeZones*
+**TEXT-to-SPEECH** - *Генерация речи из текстового файла*
 
-**Maths** - *Send Math Expression (in Python Format) to get its Result*
+**UPSCALE** - *Увеличение разрешения изображений*
 
-**Base64** - *Send 'b64e string' to encode 'string' and 'b64d string' to decode 'string'*
+**TEXT-to-VIDEO** - *Создание видео с помощью ИИ по вашему запросу*
+
+**SCAN** - *Сканирование QR-кодов и штрих-кодов*
+
+**COMPILE** - *Создание самодостаточных исполняемых файлов для Linux*
+
+**RUN** - *Запуск Python программ*
+
+**Chat with AI** - *Общение с саркастическим чат-ботом*
+
+**AI Article Writter** - *Завершение ваших статей с помощью ИИ*
+
+**TEXT-to-MUSIC** - *Генерация музыки из текста*
 
 ---
 
-# Wiki
+## Дополнительные функции
 
-- for converting **Images** it uses **[ImageMagic](https://imagemagick.org/)**
+**Крестики-нолики** - *Игра в крестики-нолики с ботом или другими игроками*
 
-- for **OCR** reading of **Images** it uses **[Tesseract-OCR](https://github.com/tesseract-ocr/tesseract/)**
+**Угадай число** - *Бот угадает ваше число*
 
-- for converting **Videos** and **Audios** it uses **[FFmpeg](https://ffmpeg.org/)**
+**SAVE RESTRICTED** - *Отправьте ссылку на пост из публичного чата с ограничениями, бот отправит вам этот пост*
 
-- for converting **Documents** it uses **[LibreOffice](https://www.libreoffice.org/)**
+**Torrent <-> Magnet** - *Отправьте торрент-файл для получения Magnet-ссылки и наоборот*
 
-- for converting **Fonts** it uses **[FontForge](https://fontforge.org/)**
+**Время и дата** - *Отправьте 'Time' или 'Date' для получения текущего времени и даты в различных часовых поясах*
 
-- for converting **eBooks** it uses **[Calibre](https://calibre-ebook.com/)**
+**Математика** - *Отправьте математическое выражение (в формате Python) для получения результата*
 
-- for extracting **Archives** it uses **[7zip](https://www.7-zip.org/)**
+**Base64** - *Отправьте 'b64e строка' для кодирования строки и 'b64d строка' для декодирования строки*
 
-- for converting **Subtitles** it uses **[TTconv](https://github.com/sandflow/ttconv/)**
+---
 
-- for converting **3D Models** it uses **[OpenCTM-Tools](https://github.com/Danny02/OpenCTM/)**
+# Используемые технологии
 
-- for converting **TGS** it uses **[TGSconverter](https://github.com/Benau/tgsconverter/)**
+- для конвертации **изображений** используется **[ImageMagic](https://imagemagick.org/)**
 
-- for transpiling **Python Programs** it uses **[Py2Many](https://github.com/py2many/py2many/)**
+- для **OCR** чтения **изображений** используется **[Tesseract-OCR](https://github.com/tesseract-ocr/tesseract/)**
 
-- for transpiling **C Programs** it uses **[C4Go](https://github.com/Konstantin8105/c4go/)**
+- для конвертации **видео** и **аудио** используется **[FFmpeg](https://ffmpeg.org/)**
 
-- for transpiling **Java Programs** it uses **[Jsweet](https://github.com/cincheo/jsweet/)**
+- для конвертации **документов** используется **[LibreOffice](https://www.libreoffice.org/)**
 
-- for scanning **QR & Bar Codes** it uses **[PyzBar](https://github.com/NaturalHistoryMuseum/pyzbar/)**
+- для конвертации **шрифтов** используется **[FontForge](https://fontforge.org/)**
 
-- for compiling **JAR** it uses **[Warp4j](https://github.com/guziks/warp4j/)**
+- для конвертации **электронных книг** используется **[Calibre](https://calibre-ebook.com/)**
 
-- for compiling **C & C++** it uses **[G++](https://gcc.gnu.org/)**
+- для извлечения **архивов** используется **[7zip](https://www.7-zip.org/)**
 
-- for compiling **Python** it uses **[PyInstaller](https://github.com/pyinstaller/pyinstaller/)**
+- для конвертации **субтитров** используется **[TTconv](https://github.com/sandflow/ttconv/)**
 
-- for **Colorizing Images** it uses **[DeOldify](https://github.com/jantic/DeOldify/)** hosted on **[Hugging Face](https://huggingface.co/spaces/PaddlePaddle/deoldify/)** and **[Photo-Colorizer](https://github.com/PySimpleGUI/PySimpleGUI-Photo-Colorizer)**
+- для конвертации **3D моделей** используется **[OpenCTM-Tools](https://github.com/Danny02/OpenCTM/)**
 
-- for generating **AI Images** it uses **[Craiyon](https://www.craiyon.com/)** (also know as Dalle-Mini) and **[Stable Diffusion](https://github.com/Stability-AI/stablediffusion)** hosted on **[Hugging Face](https://huggingface.co/spaces/stabilityai/stable-diffusion)**
+- для конвертации **TGS** используется **[TGSconverter](https://github.com/Benau/tgsconverter/)**
 
+- для транспиляции **Python программ** используется **[Py2Many](https://github.com/py2many/py2many/)**
 
-- for generating **Positive Images** it uses **[C41lab or C41](https://gist.github.com/stollcri/1aaec353a0e883888920c1b501cc1484/)**, **[Open-CV](https://opencv.org/)** and **[Negfix8](https://github.com/chrishunt/negfix8/)**
+- для транспиляции **C программ** используется **[C4Go](https://github.com/Konstantin8105/c4go/)**
 
-- for **Speech to Text** it uses **[Google's API](https://github.com/Uberi/speech_recognition)** and **[Open-AI's Whisper](https://github.com/openai/whisper)** hosted on **[Hugging Face](https://huggingface.co/spaces/Amrrs/openai-whisper-live-transcribe)**
+- для транспиляции **Java программ** используется **[Jsweet](https://github.com/cincheo/jsweet/)**
 
-- for **Text to Speech** it uses **[Google's gTTS API](https://github.com/pndurette/gTTS)** 
+- для сканирования **QR и штрих-кодов** используется **[PyzBar](https://github.com/NaturalHistoryMuseum/pyzbar/)**
 
-- for **Upscalling Images** it uses **[Zyro's Image-Upscaller](https://zyro.com/in/tools/image-upscaler)** 
+- для компиляции **JAR** используется **[Warp4j](https://github.com/guziks/warp4j/)**
 
-- for **Torrents** it uses **[iTorrents](https://itorrents.org/)** and **[Torrent2Magnet](https://github.com/repolho/torrent2magnet)**
+- для компиляции **C & C++** используется **[G++](https://gcc.gnu.org/)**
 
-- for **Date and Time** it uses **[Arrow](https://github.com/arrow-py/arrow)**
+- для компиляции **Python** используется **[PyInstaller](https://github.com/pyinstaller/pyinstaller/)**
 
-- for **Maths** and **RUN** it uses **[ASTeval](https://github.com/newville/asteval)**
+- для **раскрашивания изображений** используется **[DeOldify](https://github.com/jantic/DeOldify/)** размещенный на **[Hugging Face](https://huggingface.co/spaces/PaddlePaddle/deoldify/)** и **[Photo-Colorizer](https://github.com/PySimpleGUI/PySimpleGUI-Photo-Colorizer)**
 
-- for generating **3D Models** it uses **[Point-E](https://github.com/openai/point-e/)** hosted on **[Hugging Face](https://huggingface.co/spaces/openai/point-e)**
+- для генерации **ИИ изображений** используется **[Craiyon](https://www.craiyon.com/)** (также известный как Dalle-Mini) и **[Stable Diffusion](https://github.com/Stability-AI/stablediffusion)** размещенный на **[Hugging Face](https://huggingface.co/spaces/stabilityai/stable-diffusion)**
 
-- for **Chat with AI** it uses **V23 CHATBOT hosted on [Hugging Face](https://huggingface.co/spaces/VISION23/V23ChatBot)**
+- для генерации **позитивных изображений** используется **[C41lab или C41](https://gist.github.com/stollcri/1aaec353a0e883888920c1b501cc1484/)**, **[Open-CV](https://opencv.org/)** и **[Negfix8](https://github.com/chrishunt/negfix8/)**
 
-- for **AI Article Writter** it uses **Bloom hosted on [Hugging Face](https://huggingface.co/spaces/huggingface/bloom_demo)**
+- для **речи в текст** используется **[Google's API](https://github.com/Uberi/speech_recognition)** и **[Open-AI's Whisper](https://github.com/openai/whisper)** размещенный на **[Hugging Face](https://huggingface.co/spaces/Amrrs/openai-whisper-live-transcribe)**
 
-- for **TEXT-to-MUSIC** it uses **[Riffusion](https://github.com/riffusion/riffusion) hosted on [HuggingFace](https://huggingface.co/spaces/fffiloni/spectrogram-to-music)**
+- для **текста в речь** используется **[Google's gTTS API](https://github.com/pndurette/gTTS)** 
 
-- for **BG REMOVE** it uses **[MODNet](https://github.com/ZHKKKe/MODNet) hosted on [HuggingFace](https://huggingface.co/spaces/nateraw/background-remover)**
+- для **увеличения разрешения изображений** используется **[Zyro's Image-Upscaller](https://zyro.com/in/tools/image-upscaler)** 
+
+- для работы с **торрентами** используется **[iTorrents](https://itorrents.org/)** и **[Torrent2Magnet](https://github.com/repolho/torrent2magnet)**
+
+- для работы с **датой и временем** используется **[Arrow](https://github.com/arrow-py/arrow)**
+
+- для **математики** и **RUN** используется **[ASTeval](https://github.com/newville/asteval)**
+
+- для генерации **3D моделей** используется **[Point-E](https://github.com/openai/point-e/)** размещенный на **[Hugging Face](https://huggingface.co/spaces/openai/point-e)**
+
+- для **общения с ИИ** используется **V23 CHATBOT размещенный на [Hugging Face](https://huggingface.co/spaces/VISION23/V23ChatBot)**
+
+- для **написания статей с ИИ** используется **Bloom размещенный на [Hugging Face](https://huggingface.co/spaces/huggingface/bloom_demo)**
+
+- для **TEXT-to-MUSIC** используется **[Riffusion](https://github.com/riffusion/riffusion) размещенный на [HuggingFace](https://huggingface.co/spaces/fffiloni/spectrogram-to-music)**
+
+- для **УДАЛЕНИЯ ФОНА** используется **[MODNet](https://github.com/ZHKKKe/MODNet) размещенный на [HuggingFace](https://huggingface.co/spaces/nateraw/background-remover)**

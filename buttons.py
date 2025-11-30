@@ -17,7 +17,7 @@ T3D = ('CTM','PLY','STL','3DS','DAE','OBJ','LWO','OFF','WRL')
 
 
 # buttons
-VAboard = ReplyKeyboard(row_width=3,one_time_keyboard=True,placeholder="convert to",resize_keyboard=True,selective=True)
+VAboard = ReplyKeyboard(row_width=3,one_time_keyboard=True,placeholder="конвертировать в...",resize_keyboard=True,selective=True)
 VAboard.add(
 ReplyButton('AIFF'),
 ReplyButton('AAC'),
@@ -41,10 +41,10 @@ ReplyButton('WEBM'),
 ReplyButton('WMV'),
 ReplyButton('SENDVID'),
 ReplyButton('SENDDOC'),
-ReplyButton('SpeechToText')
+# ReplyButton('SpeechToText')
             )    
 
-IMGboard = ReplyKeyboard(row_width=3,one_time_keyboard=True,placeholder="convert to",resize_keyboard=True,selective=True)
+IMGboard = ReplyKeyboard(row_width=3,one_time_keyboard=True,placeholder="конвертировать в...",resize_keyboard=True,selective=True)
 IMGboard.add(
 ReplyButton('OCR'),
 ReplyButton('ICO'),
@@ -56,16 +56,16 @@ ReplyButton('JPEG'),
 ReplyButton('JPG'),
 ReplyButton('PNG'),
 ReplyButton('SVG'),
-ReplyButton('COLOR'),
-ReplyButton('POSITIVE'),
-ReplyButton('UPSCALE'),
-ReplyButton('SCAN'),
-ReplyButton('BG REMOVE'),
+# ReplyButton('COLOR'),
+# ReplyButton('POSITIVE'),
+# ReplyButton('UPSCALE'),
+#ReplyButton('SCAN'),
+# ReplyButton('BG REMOVE'),
 ReplyButton('SENDPHOTO'),
 ReplyButton('SENDDOC')
             )
 
-LBWboard = ReplyKeyboard(row_width=3,one_time_keyboard=True,placeholder="convert to",resize_keyboard=True,selective=True)
+LBWboard = ReplyKeyboard(row_width=3,one_time_keyboard=True,placeholder="конвертировать в...",resize_keyboard=True,selective=True)
 LBWboard.add(
 ReplyButton('ODT'),
 ReplyButton('DOC'),
@@ -79,10 +79,10 @@ ReplyButton('WPS'),
 ReplyButton('OTT'),
 ReplyButton('TXT'),
 ReplyButton('READ'),
-ReplyButton('TextToSpeech')
+# ReplyButton('TextToSpeech')
             )
 
-LBIboard = ReplyKeyboard(row_width=3,one_time_keyboard=True,placeholder="convert to",resize_keyboard=True,selective=True)
+LBIboard = ReplyKeyboard(row_width=3,one_time_keyboard=True,placeholder="конвертировать в...",resize_keyboard=True,selective=True)
 LBIboard.add(
 ReplyButton('ODP'),
 ReplyButton('PPT'),
@@ -99,7 +99,7 @@ ReplyButton('XML'),
 ReplyButton('PDF')
             )
 
-LBCboard = ReplyKeyboard(row_width=3,one_time_keyboard=True,placeholder="convert to",resize_keyboard=True,selective=True)
+LBCboard = ReplyKeyboard(row_width=3,one_time_keyboard=True,placeholder="конвертировать в...",resize_keyboard=True,selective=True)
 LBCboard.add(
 ReplyButton('ODS'),
 ReplyButton('XLS'),
@@ -115,7 +115,7 @@ ReplyButton('CSV'),
 ReplyButton('XLM')
             )       
 
-FFboard = ReplyKeyboard(row_width=3,one_time_keyboard=True,placeholder="convert to",resize_keyboard=True,selective=True)
+FFboard = ReplyKeyboard(row_width=3,one_time_keyboard=True,placeholder="конвертировать в...",resize_keyboard=True,selective=True)
 FFboard.add(
 ReplyButton('SFD'),
 ReplyButton('BDF'),
@@ -129,7 +129,7 @@ ReplyButton('UFO'),
 ReplyButton('WOFF')
             )
 
-EBboard = ReplyKeyboard(row_width=3,one_time_keyboard=True,placeholder="convert to",resize_keyboard=True,selective=True)
+EBboard = ReplyKeyboard(row_width=3,one_time_keyboard=True,placeholder="конвертировать в...",resize_keyboard=True,selective=True)
 EBboard.add(           
 ReplyButton('EPUB'),
 ReplyButton('MOBI'),
@@ -144,13 +144,13 @@ ReplyButton('PDF'),
 ReplyButton('TXT')
             )
 
-ARCboard = ReplyKeyboard(row_width=3,one_time_keyboard=True,placeholder="convert to",resize_keyboard=True,selective=True)
+ARCboard = ReplyKeyboard(row_width=3,one_time_keyboard=True,placeholder="конвертировать в...",resize_keyboard=True,selective=True)
 ARCboard.add(           
 ReplyButton('EXTRACT'),
             )
 
 
-SUBboard = ReplyKeyboard(row_width=3,one_time_keyboard=True,placeholder="convert to",resize_keyboard=True,selective=True)
+SUBboard = ReplyKeyboard(row_width=3,one_time_keyboard=True,placeholder="конвертировать в...",resize_keyboard=True,selective=True)
 SUBboard.add(           
 ReplyButton("TTML"), 
 #ReplyButton("SCC"),
@@ -158,7 +158,7 @@ ReplyButton("SRT"),
 ReplyButton("VTT")
             )
 
-PROboard = ReplyKeyboard(row_width=3,one_time_keyboard=True,placeholder="convert to",resize_keyboard=True,selective=True)
+PROboard = ReplyKeyboard(row_width=3,one_time_keyboard=True,placeholder="конвертировать в...",resize_keyboard=True,selective=True)
 PROboard.add(           
 #ReplyButton('C'), 
 ReplyButton('CPP'),
@@ -178,7 +178,7 @@ ReplyButton('COMPILE'),
 ReplyButton('RUN')
             )
 
-T3Dboard = ReplyKeyboard(row_width=3,one_time_keyboard=True,placeholder="convert to",resize_keyboard=True,selective=True)
+T3Dboard = ReplyKeyboard(row_width=3,one_time_keyboard=True,placeholder="конвертировать в...",resize_keyboard=True,selective=True)
 T3Dboard.add(           
 ReplyButton('CTM'), 
 ReplyButton('PLY'),
@@ -206,14 +206,14 @@ PRO_TEXT = helperfunctions.give_name(PRO)
 T3D_TEXT = helperfunctions.give_name(T3D)
 
 
-START_TEXT = f'**Images** 📷 \n__{IMG_TEXT}__\n\n\
-**Videos/Audios** 📹 / 🔊 \n__{VA_TEXT}__\n\n\
-**Documents** 💼 \n__{LBW_TEXT},{LBI_TEXT},{LBC_TEXT}__\n\n\
-**Fonts** 🔤 \n__{FF_TEXT}__\n\n\
-**eBooks** 📚 \n__{EB_TEXT}__\n\n\
-**Archives** 🗄 \n__{ARC_TEXT}__\n\n\
-**Subtitles** 🗯️ \n__{SUB_TEXT}__\n\n\
-**Programming Languages** 👨‍💻 \n__{PRO_TEXT}__\n\n\
-**3D Files** 💠 \n__{T3D_TEXT}__\n\n\
-**Special** 🎁 \n__Colorize, Positive, Upscale, Text-to-Speech, Speech-to-Text, AI Image, Chat with AI, AI Article Writter, Text-to-3D, TEXT-to-MUSIC, BG REMOVE, Scan, Compile & Run__\n\n\
-**Extra** ➕  \n__Play TicTacToe, Guess Game, Save Restricted Content, Torrent <-> Magnet, Time or Date, Maths & Base64__'
+START_TEXT = f'**Изображения** 📷 \n__{IMG_TEXT}__\n\n\
+**Видео/Аудио** 📹 / 🔊 \n__{VA_TEXT}__\n\n\
+**Документы** 💼 \n__{LBW_TEXT},{LBI_TEXT},{LBC_TEXT}__\n\n\
+**Шрифты** 🔤 \n__{FF_TEXT}__\n\n\
+**Электронные книги** 📚 \n__{EB_TEXT}__\n\n\
+**Архивы** 🗄 \n__{ARC_TEXT}__\n\n\
+**Субтитры** 🗯️ \n__{SUB_TEXT}__\n\n\
+**Языки программирования** 👨‍💻 \n__{PRO_TEXT}__\n\n\
+**3D файлы** 💠 \n__{T3D_TEXT}__'
+#\n\n\**Специальное** 🎁 \n__Colorize, Positive, Upscale, Text-to-Speech, Speech-to-Text, AI Image, Chat with AI, AI Article Writter, Text-to-3D, TEXT-to-MUSIC, BG REMOVE, Scan, Compile & Run__\n\n\
+# **Дополнительно** ➕  \n__Play TicTacToe, Guess Game, Save Restricted Content, Torrent <-> Magnet, Time or Date, Maths & Base64__'
