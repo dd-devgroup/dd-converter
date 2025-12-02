@@ -3,6 +3,9 @@ from pyrogram import Client
 from pyrogram import filters
 from pyrogram import enums
 from pyrogram.types import InlineKeyboardMarkup,InlineKeyboardButton
+from pyrogram.errors import UserNotParticipant
+from functools import wraps
+import yaml
 
 import os
 import shutil
@@ -11,7 +14,7 @@ import threading
 import time
 
 from buttons import *
-# import aifunctions
+import aifunctions
 import helperfunctions
 import mediainfo
 import guess
@@ -20,6 +23,10 @@ import progconv
 import others
 import tictactoe
 
+
+# Load config
+with open('config.yaml', 'r') as f:
+    config = yaml.safe_load(f)
 
 # env
 bot_token = os.environ.get("TOKEN", "")
@@ -31,6 +38,22 @@ api_id = os.environ.get("ID", "")
 app = Client("my_bot",api_id=api_id, api_hash=api_hash,bot_token=bot_token)
 MESGS = {}
 
+# Subscription check decorator
+def check_subscription(func):
+    @wraps(func)
+    async def wrapper(client, message):
+        news_channel_id = config['telegram']['news_channel_id']
+        if news_channel_id.startswith('https://t.me/'):
+            news_channel_id = '@' + news_channel_id.split('/')[-1]
+        try:
+            await client.get_chat_member(chat_id=news_channel_id, user_id=message.from_user.id)
+        except UserNotParticipant:
+            await message.reply_text(
+                f"Для использования бота, пожалуйста, подпишитесь на наш новостной канал: {config['telegram']['news_channel_id']}"
+            )
+            return
+        await func(client, message)
+    return wrapper
 
 # msgs functions
 def saveMsg(msg, msg_type):
@@ -40,7 +63,8 @@ def getSavedMsg(msg):
     return MESGS.get(msg.from_user.id, [None, None])
 
 def removeSavedMsg(msg):
-    del MESGS[msg.from_user.id]
+    if msg.from_user.id in MESGS:
+        del MESGS[msg.from_user.id]
 
 
 # main function to follow
@@ -58,18 +82,18 @@ def follow(message,inputt,new,old,oldmessage):
         cmd = helperfunctions.ffmpegcommand(file,output,new)
 
         if msg != None:
-            app.edit_message_text(message.chat.id, msg.id, '__Конвертация__')
+            app.edit_message_text(message.chat.id, msg.id, 'Конвертация... ⏳')
 
         os.system(cmd)
         os.remove(file)
         conlink = helperfunctions.videoinfo(output)
 
         if os.path.exists(output) and os.path.getsize(output) > 0:
-            caption=f'**Исходный файл** : __{srclink}__\n\n**Результат** : __{conlink}__'
+            caption=f'**Исходный файл**: `{srclink}`\n\n**Результат**: `{conlink}`'
             app.send_chat_action(message.chat.id, enums.ChatAction.UPLOAD_DOCUMENT)
             up(message,output,msg,capt=caption)
         else:
-            app.send_message(message.chat.id,"__Ошибка во время конвертации__", reply_to_message_id=message.id)
+            app.send_message(message.chat.id,"❌ Ошибка во время конвертации", reply_to_message_id=message.id)
             
         if os.path.exists(output):
             os.remove(output)   
@@ -88,10 +112,10 @@ def follow(message,inputt,new,old,oldmessage):
         if os.path.exists(output) and os.path.getsize(output) > 0:
             app.send_chat_action(message.chat.id, enums.ChatAction.UPLOAD_DOCUMENT)
             app.send_document(message.chat.id,document=output, force_document=True,
-                              caption=f'**Исходный файл** : __{srclink}\n\n**Результат** : __{conlink}__',
+                              caption=f'**Исходный файл**: `{srclink}`\n\n**Результат**: `{conlink}`',
                               reply_to_message_id=message.id)
         else:
-            app.send_message(message.chat.id,"__Ошибка во время конвертации__", reply_to_message_id=message.id)
+            app.send_message(message.chat.id,"❌ Ошибка во время конвертации", reply_to_message_id=message.id)
 
         if os.path.exists(output):
             os.remove(output) 
@@ -130,17 +154,17 @@ def follow(message,inputt,new,old,oldmessage):
             if os.path.exists(output) and os.path.getsize(output) > 0:
                 app.send_chat_action(message.chat.id, enums.ChatAction.UPLOAD_DOCUMENT)
                 app.send_document(message.chat.id,document=output, force_document=True,
-                                  caption=f'**Исходный файл** : __{srclink}\n\n**Результат** : __{conlink}__',
+                                  caption=f'**Исходный файл**: `{srclink}`\n\n**Результат**: `{conlink}`',
                                   reply_to_message_id=message.id)
             else:
-                app.send_message(message.chat.id,"__Ошибка во время конвертации__", reply_to_message_id=message.id)
+                app.send_message(message.chat.id,"❌ Ошибка во время конвертации", reply_to_message_id=message.id)
 
             if os.path.exists(output):
                 os.remove(output)
 
         else:
             app.send_message(message.chat.id,
-                 "__Доступные преобразования для анимированных стикеров: только **GIF, PNG** и **WEBP**__",
+                 "Доступные преобразования для анимированных стикеров: только **GIF, PNG** и **WEBP**",
                  reply_to_message_id=message.id)
 
 
@@ -157,7 +181,7 @@ def follow(message,inputt,new,old,oldmessage):
             app.send_chat_action(message.chat.id, enums.ChatAction.UPLOAD_DOCUMENT)
             app.send_document(message.chat.id, document=output, force_document=True, reply_to_message_id=message.id)
         else:
-            app.send_message(message.chat.id,"__Ошибка во время конвертации__", reply_to_message_id=message.id)
+            app.send_message(message.chat.id,"❌ Ошибка во время конвертации", reply_to_message_id=message.id)
             
         if os.path.exists(output):
             os.remove(output) 
@@ -169,7 +193,6 @@ def follow(message,inputt,new,old,oldmessage):
         print("It is LibreOffice option")
         file = app.download_media(message)
         cmd = helperfunctions.libreofficecommand(file,new)
-        # os.system(cmd)
         subprocess.run([cmd],env={"HOME": "."},)
         os.remove(file)
 
@@ -177,7 +200,7 @@ def follow(message,inputt,new,old,oldmessage):
             app.send_chat_action(message.chat.id, enums.ChatAction.UPLOAD_DOCUMENT)
             app.send_document(message.chat.id,document=output, force_document=True, reply_to_message_id=message.id)
         else:
-            app.send_message(message.chat.id,"__Ошибка во время конвертации__", reply_to_message_id=message.id)
+            app.send_message(message.chat.id,"❌ Ошибка во время конвертации", reply_to_message_id=message.id)
         
         if os.path.exists(output):
             os.remove(output) 
@@ -197,7 +220,7 @@ def follow(message,inputt,new,old,oldmessage):
             app.send_chat_action(message.chat.id, enums.ChatAction.UPLOAD_DOCUMENT)
             app.send_document(message.chat.id,document=output, force_document=True, reply_to_message_id=message.id)
         else:
-            app.send_message(message.chat.id,"__Ошибка во время конвертации__", reply_to_message_id=message.id)
+            app.send_message(message.chat.id,"❌ Ошибка во время конвертации", reply_to_message_id=message.id)
             
         if os.path.exists(output):
             os.remove(output) 
@@ -207,7 +230,7 @@ def follow(message,inputt,new,old,oldmessage):
     elif output.upper().endswith(SUB) and inputt.upper().endswith(SUB):
 
         if not ((old.upper() in ["TTML", "SCC", "SRT"]) and (new.upper() in ["TTML","SRT", "VTT"])):
-            app.send_message(message.chat.id,f"__**{old.upper()}** to **{new.upper()}** is not Supported.\n\n**Supported Formats**\n**Inputs**: TTML, SCC & SRT\n**Outputs**: TTML, SRT & VTT__", reply_to_message_id=message.id)
+            app.send_message(message.chat.id,f"**{old.upper()}** to **{new.upper()}** is not Supported.\n\n**Supported Formats**\n**Inputs**: TTML, SCC & SRT\n**Outputs**: TTML, SRT & VTT", reply_to_message_id=message.id)
 
         else:
             print("It is Subtitles option")
@@ -220,7 +243,7 @@ def follow(message,inputt,new,old,oldmessage):
                 app.send_chat_action(message.chat.id, enums.ChatAction.UPLOAD_DOCUMENT)
                 app.send_document(message.chat.id,document=output, force_document=True, reply_to_message_id=message.id)
             else:
-                app.send_message(message.chat.id,"__Ошибка во время конвертации__", reply_to_message_id=message.id)
+                app.send_message(message.chat.id,"❌ Ошибка во время конвертации", reply_to_message_id=message.id)
                 
             if os.path.exists(output):
                 os.remove(output)
@@ -246,8 +269,8 @@ def follow(message,inputt,new,old,oldmessage):
             lang = new.upper()
 
         if not flag:
-            app.send_message(message.chat.id, f"__**{old.upper()}** в **{new.upper()}** не поддерживается.\n\
-            \n**Поддерживаемые форматы:**\nC -> GO\nPY -> CPP, RS, JL, KT, NIM, DART & GO\nJAVA -> JS & TS__",
+            app.send_message(message.chat.id, f"**{old.upper()}** в **{new.upper()}** не поддерживается.\n\
+            \n**Поддерживаемые форматы:**\nC -> GO\nPY -> CPP, RS, JL, KT, NIM, DART & GO\nJAVA -> JS & TS",
                              reply_to_message_id=message.id)
         else:
             print("It is Programs option")
@@ -277,7 +300,7 @@ def follow(message,inputt,new,old,oldmessage):
             else:
                 if flag != 3:
                     errormessage = "Ошибка во время конвертации"
-                app.send_message(message.chat.id,f"__{errormessage}__", reply_to_message_id=message.id)
+                app.send_message(message.chat.id,f"`{errormessage}`", reply_to_message_id=message.id)
                 
             if os.path.exists(output):
                 os.remove(output)
@@ -288,7 +311,7 @@ def follow(message,inputt,new,old,oldmessage):
 
         if (old.upper() == "WRL"):
             app.send_message(message.chat.id,
-                             f"__**{old.upper()}** доступен только для экспорта, нельзя использовать для конвертации из этого формата__",
+                             f"**{old.upper()}** доступен только для экспорта, нельзя использовать для конвертации из этого формата",
                              reply_to_message_id=message.id)
         else:
             print("It is 3D files option")
@@ -301,7 +324,7 @@ def follow(message,inputt,new,old,oldmessage):
                 app.send_chat_action(message.chat.id, enums.ChatAction.UPLOAD_DOCUMENT)
                 app.send_document(message.chat.id,document=output, force_document=True, reply_to_message_id=message.id)
             else:
-                app.send_message(message.chat.id,"__Ошибка во время конвертации__", reply_to_message_id=message.id)
+                app.send_message(message.chat.id,"❌ Ошибка во время конвертации", reply_to_message_id=message.id)
                 
             if os.path.exists(output):
                 os.remove(output)
@@ -309,13 +332,13 @@ def follow(message,inputt,new,old,oldmessage):
 
     # or else
     else:
-        app.send_message(message.chat.id,"__Выберите допустимое расширение, не вводите его вручную.__", reply_to_message_id=message.id)
+        app.send_message(message.chat.id,"Выберите допустимое расширение, не вводите его вручную.", reply_to_message_id=message.id)
 
 
     # deleting message    
     app.delete_messages(message.chat.id,message_ids=oldmessage.id)
 
-'''
+
 # negative to positive
 def negetivetopostive(message,oldmessage):
     file = app.download_media(message)
@@ -409,12 +432,12 @@ def genratevideos(message,prompt):
     app.send_video(message.chat.id, video=file, reply_to_message_id=message.id) #,caption=f"COGVIDEO : {prompt}")
     os.remove(file)
     app.delete_messages(message.chat.id,message_ids=msg.id)
-'''
+
 
 # delete msg
-def dltmsg(umsg,rmsg,sec=15):
+async def dltmsg(umsg,rmsg,sec=15):
     time.sleep(sec)
-    app.delete_messages(umsg.chat.id,message_ids=[umsg.id,rmsg.id])
+    await app.delete_messages(umsg.chat.id,message_ids=[umsg.id,rmsg.id])
 
 
 # read file
@@ -428,14 +451,14 @@ def readf(message,oldmessage):
         split = [txt[i:i+n] for i in range(0, len(txt), n)]
 
         if len(split) > 10:
-            app.send_message(message.chat.id, "__Содержимое файла слишком длинное__", reply_to_message_id=message.id)
+            app.send_message(message.chat.id, "Содержимое файла слишком длинное", reply_to_message_id=message.id)
             return
 
         for ele in split:
             app.send_message(message.chat.id, ele, disable_web_page_preview=True, reply_to_message_id=message.id)
             time.sleep(3)   
     except Exception as e:
-            app.send_message(message.chat.id, f"__Ошибка во время чтении файла : {e}__", reply_to_message_id=message.id)
+            app.send_message(message.chat.id, f"❌ Ошибка во время чтении файла : {e}", reply_to_message_id=message.id)
 
     os.remove(file)
     app.delete_messages(message.chat.id,message_ids=oldmessage.id)
@@ -473,7 +496,7 @@ def extract(message, oldm):
     file, msg = down(message)
     cmd, foldername, infofile = helperfunctions.zipcommand(file, message)
     if msg != None:
-        app.edit_message_text(message.chat.id, msg.id, '__Извлечение__')
+        app.edit_message_text(message.chat.id, msg.id, 'Извлечение... 📂')
     os.system(cmd)
     os.remove(file)
 
@@ -488,7 +511,7 @@ def extract(message, oldm):
             if msg != None:
                 app.delete_messages(message.chat.id, message_ids=msg.id)
             app.send_message(message.chat.id,
-                             f"__Количество файлов: **{len(dir_list)}**, что превышает лимит в **30** файлов__",
+                             f"Количество файлов: **{len(dir_list)}**, что превышает лимит в **30** файлов",
                              reply_to_message_id=message.id)
         else:
             for ele in dir_list:
@@ -497,12 +520,12 @@ def extract(message, oldm):
                     os.remove(ele)
                 else:
                     app.send_message(message.chat.id,
-                                     f'**{ele.split("/")[-1]}** __пропущен, так как имеет размер 0 байт__',
+                                     f'**{ele.split("/")[-1]}** пропущен, так как имеет размер 0 байт',
                                      reply_to_message_id=message.id)
 
             if msg != None:
                 app.delete_messages(message.chat.id, message_ids=msg.id)
-            app.send_message(message.chat.id, f'__{last}__', reply_to_message_id=message.id)
+            app.send_message(message.chat.id, f'`{last}`', reply_to_message_id=message.id)
 
         shutil.rmtree(foldername)
     else:
@@ -515,7 +538,7 @@ def extract(message, oldm):
 def getmag(message,oldm):
     file = app.download_media(message)
     maglink = tormag.getMagnet(file)
-    app.send_message(message.chat.id, f'__{maglink}__', reply_to_message_id=message.id)
+    app.send_message(message.chat.id, f'`{maglink}`', reply_to_message_id=message.id)
     app.delete_messages(message.chat.id,message_ids=oldm.id)
     os.remove(file)
 
@@ -550,7 +573,7 @@ def compile(message,oldm):
                 os.remove(ele)
             shutil.rmtree(folder)
         else:
-            app.send_message(message.chat.id,"__Ошибка во время компиляции__", reply_to_message_id=message.id)
+            app.send_message(message.chat.id,"❌ Ошибка во время компиляции", reply_to_message_id=message.id)
 
 
     # c and c++ compilation
@@ -560,10 +583,10 @@ def compile(message,oldm):
         os.system(cmd)
         os.remove(file)
         if os.path.exists(output) and os.path.getsize(output) > 0:
-            app.send_document(message.chat.id,document=output, caption="__Исполняемый файл Linux__", force_document=True, reply_to_message_id=message.id)
+            app.send_document(message.chat.id,document=output, caption="Исполняемый файл Linux", force_document=True, reply_to_message_id=message.id)
             os.remove(output)
         else:
-            app.send_message(message.chat.id,"__Ошибка во время компиляции__", reply_to_message_id=message.id)
+            app.send_message(message.chat.id,"❌ Ошибка во время компиляции", reply_to_message_id=message.id)
         
 
     # python compile
@@ -573,10 +596,10 @@ def compile(message,oldm):
         os.system(cmd)
         os.remove(file)
         if os.path.exists(output) and os.path.getsize(output) > 0:
-            app.send_document(message.chat.id,document=output, caption="__Исполняемый файл Linux__", force_document=True, reply_to_message_id=message.id)
+            app.send_document(message.chat.id,document=output, caption="Исполняемый файл Linux", force_document=True, reply_to_message_id=message.id)
             os.remove(output)
         else:
-            app.send_message(message.chat.id,"__Ошибка во время компиляции__", reply_to_message_id=message.id)
+            app.send_message(message.chat.id,"❌ Ошибка во время компиляции", reply_to_message_id=message.id)
         
         if os.path.exists(temp):
             os.remove(temp)
@@ -588,7 +611,7 @@ def compile(message,oldm):
 
     # not supported yet
     else:
-        app.send_message(message.chat.id,"__В настоящее время компиляция поддерживается только из файлов JAR, PY, C и CPP.__", reply_to_message_id=message.id)
+        app.send_message(message.chat.id,"В настоящее время компиляция поддерживается только из файлов JAR, PY, C и CPP.", reply_to_message_id=message.id)
 
 
     # delete message
@@ -611,9 +634,9 @@ def runpro(message,oldm):
 
     # not supported yet
     else:
-        app.send_message(message.chat.id,"__В настоящее время запуск поддерживается только из файлов PY.__", reply_to_message_id=message.id)
+        app.send_message(message.chat.id,"В настоящее время запуск поддерживается только из файлов PY.", reply_to_message_id=message.id)
 
-'''
+
 # bg remove
 def bgremove(message,oldm):
     file = app.download_media(message)
@@ -622,13 +645,13 @@ def bgremove(message,oldm):
     app.send_document(message.chat.id, ofile, reply_to_message_id=message.id)
     app.delete_messages(message.chat.id,message_ids=oldm.id)
     os.remove(ofile)
-'''
+
 
 # scanning
 def scan(message,oldm):
     file = app.download_media(message)
     info = helperfunctions.scanner(file)
-    app.send_message(message.chat.id,f"__{info}__", reply_to_message_id=message.id)
+    app.send_message(message.chat.id,f"`{info}`", reply_to_message_id=message.id)
     app.delete_messages(message.chat.id,message_ids=oldm.id)
     os.remove(file)
 
@@ -638,8 +661,8 @@ def makefile(message,mtext,oldmessage):
     text = mtext.split("\n")
     if len(text) == 1:
         app.send_message(message.chat.id,
-                         "__Make-File берет первую строку вашего текста в качестве имени файла, "
-                         "а содержимое файла начинается со второй строки__",
+                         "Make-File берет первую строку вашего текста в качестве имени файла, "
+                         "а содержимое файла начинается со второй строки",
                          reply_to_message_id=message.id)
         return
 
@@ -657,12 +680,12 @@ def makefile(message,mtext,oldmessage):
     if os.path.exists(firstline) and os.path.getsize(firstline) > 0:
         app.send_document(message.chat.id, document=firstline, reply_to_message_id=message.id)
     else:
-        app.send_message(message.chat.id, "__Ошибка при создании файла__", reply_to_message_id=message.id)
+        app.send_message(message.chat.id, "❌ Ошибка при создании файла", reply_to_message_id=message.id)
 
     app.delete_messages(message.chat.id,message_ids=oldmessage.id)
     os.remove(firstline)      	    
 
-'''
+
 # transcript speech to text
 def transcript(message,oldmessage):
     file = app.download_media(message)
@@ -687,7 +710,7 @@ def transcript(message,oldmessage):
         with open(temp,"w") as wfile:
             wfile.write(data)
         if os.path.getsize(temp) > 0:
-            app.send_document(message.chat.id, document=temp,caption="**OpenAI Engine** __(whisper)__", reply_to_message_id=message.id)
+            app.send_document(message.chat.id, document=temp,caption="**OpenAI Engine** (whisper)", reply_to_message_id=message.id)
         os.remove(temp)
 
     app.delete_messages(message.chat.id,message_ids=oldmessage.id)
@@ -726,11 +749,11 @@ def increaseres(message,oldmessage):
         os.remove(file)
         app.send_document(message.chat.id, document=inputt, reply_to_message_id=message.id)
     except Exception as e:
-        app.send_message(message.chat.id, f"__Error : {e}__", reply_to_message_id=message.id)
+        app.send_message(message.chat.id, f"❌ Error : {e}", reply_to_message_id=message.id)
         
     app.delete_messages(message.chat.id,message_ids=oldmessage.id)
     os.remove(inputt)
-'''
+
 
 # renaming
 def rname(message,newname,oldm):
@@ -756,9 +779,12 @@ def saverec(message):
     msg  = app.get_messages(username,msgid)
     app.copy_message(message.chat.id, msg.chat.id, msg.id)
 
-'''
+
 # AI chat
 def handleAIChat(message):
+    if not config['features']['ai_chat']:
+        app.send_message(message.chat.id, "Эта функция отключена.", reply_to_message_id=message.id)
+        return
     hash = str(message.chat.id)
     if hash[0] == "-": hash = str(hash)[1:]
 
@@ -771,12 +797,15 @@ def handleAIChat(message):
 # bloom
 def handelbloom(para,message,msg):
     ans = aifunctions.bloom(para)
-    if ans is not None: app.send_message(message.chat.id, f'__{ans}__', reply_to_message_id=message.id)
+    if ans is not None: app.send_message(message.chat.id, f'`{ans}`', reply_to_message_id=message.id)
     app.delete_messages(message.chat.id, message_ids=msg.id)
 
 
 # others
 def other(message):
+    if not config['features']['other_utils']:
+        handleAIChat(message)
+        return
 
     # time date
     if message.text in ["time","Time",'date','Date']:
@@ -785,16 +814,16 @@ def other(message):
     # b64 decode
     elif message.text[:5] == "b64d ":
         try:
-            app.send_message(message.chat.id, f'__{others.b64d(message.text[5:])}__', reply_to_message_id=message.id)
+            app.send_message(message.chat.id, f'`{others.b64d(message.text[5:])}`', reply_to_message_id=message.id)
         except:
-            app.send_message(message.chat.id, "__Invalid__", reply_to_message_id=message.id)
+            app.send_message(message.chat.id, "Invalid", reply_to_message_id=message.id)
 
     # b64 encode
     elif message.text[:5] == "b64e ":
         try:
-            app.send_message(message.chat.id, f'__{others.b64e(message.text[5:])}__', reply_to_message_id=message.id)
+            app.send_message(message.chat.id, f'`{others.b64e(message.text[5:])}`', reply_to_message_id=message.id)
         except:
-            app.send_message(message.chat.id, "__Invalid__", reply_to_message_id=message.id)
+            app.send_message(message.chat.id, "Invalid", reply_to_message_id=message.id)
 
     # maths
     elif not message.text.isalnum():
@@ -807,7 +836,7 @@ def other(message):
     # AI chat
     else:
         handleAIChat(message)
-'''
+
 # download with progress
 def down(message):
 
@@ -820,14 +849,15 @@ def down(message):
             size = 1
 
     if size > 25000000:
-        msg = app.send_message(message.chat.id, '__Скачивание__', reply_to_message_id=message.id)
+        msg = app.send_message(message.chat.id, 'Скачивание... 📥', reply_to_message_id=message.id)
         dosta = threading.Thread(target=lambda:downstatus(f'{message.id}downstatus.txt',msg),daemon=True)
         dosta.start()
     else:
         msg = None
 
     file = app.download_media(message,progress=dprogress, progress_args=[message])
-    os.remove(f'{message.id}downstatus.txt')
+    if os.path.exists(f'{message.id}downstatus.txt'):
+        os.remove(f'{message.id}downstatus.txt')
     return file,msg
 
 
@@ -836,7 +866,7 @@ def up(message, file, msg, video=False, capt="", thumb=None, duration=0, widht=0
 
     if msg != None:
         try:
-            app.edit_message_text(message.chat.id, msg.id, '__Загрузка__')
+            app.edit_message_text(message.chat.id, msg.id, 'Загрузка... 📤')
         except:
             pass
         
@@ -883,13 +913,8 @@ def upstatus(statusfile,message):
         with open(statusfile,"r") as upread:
             txt = upread.read()
 
-        #if "%" not in txt:
-                #txt = "0.0%"
-
         try:
-            app.edit_message_text(message.chat.id, message.id, f"__Загружено__ : **{txt}**")
-            #if txt == "100.0%":
-                #break
+            app.edit_message_text(message.chat.id, message.id, f"Загружено : **{txt}**")
             time.sleep(10)
         except:
             time.sleep(5)
@@ -908,13 +933,8 @@ def downstatus(statusfile,message):
         with open(statusfile,"r") as upread:
             txt = upread.read()
         
-        #if "%" not in txt:
-                #txt = "0.0%"
-
         try:
-            app.edit_message_text(message.chat.id, message.id, f"__Скачано__ : **{txt}**")
-            #if txt == "100.0%":
-                #break
+            app.edit_message_text(message.chat.id, message.id, f"Скачано : **{txt}**")
             time.sleep(10)
         except:
             time.sleep(5)
@@ -922,139 +942,153 @@ def downstatus(statusfile,message):
 
 # app messages
 @app.on_message(filters.command(['start']))
-def start(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    app.send_message(message.chat.id, f"Добро пожаловать, {message.from_user.mention}\n"
-                                      f"Сначала отправьте **Файл**, а затем выберите **Расширение**\n\n"
-                                      f"__хотите узнать больше обо мне?\n"
-                                      f"используйте /help - чтобы получить список команд\n"
-                                      f"используйте /detail - чтобы получить список поддерживаемых расширений__",
+async def start(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    await app.send_message(message.chat.id, f"👋 Добро пожаловать, {message.from_user.mention}!\n"
+                                      f"Отправьте мне **файл**, а затем выберите **расширение** для конвертации.\n\n"
+                                      f"🧐 Хотите узнать больше обо мне?\n"
+                                      f"Используйте /help, чтобы получить список команд.\n"
+                                      f"Используйте /detail, чтобы получить список поддерживаемых расширений.",
                                     reply_to_message_id=message.id)
 
 
 # detail
 @app.on_message(filters.command(['detail']))
-def start(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    oldm = app.send_message(message.chat.id, START_TEXT, reply_to_message_id=message.id)
+@check_subscription
+async def detail(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    oldm = await app.send_message(message.chat.id, START_TEXT, reply_to_message_id=message.id)
     dm = threading.Thread(target=lambda:dltmsg(message,oldm,30),daemon=True)
     dm.start()  
     
 
 # help
 @app.on_message(filters.command(['help']))
-def help(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    oldm = app.send_message(message.chat.id,
-        "__Доступные команды__\n\n"
-        "**/start - Проверить доступные преобразования\n"
-        "/help - Справка\n"
-        "/detail - Поддерживаемые расширения\n"
-        # "/imagegen - Текст в изображение\n"
-        # "/musicgen - Текст в музыку\n"
-        # "/3dgen - Текст в 3D\n"
-        # "/bloom - AI-генератор статей\n"
-        "/cancel - Отмена\n"
-        "/rename - Переименовать файл\n"
-        "/read - Прочитать файл\n"
-        "/make - Создать файл\n"
-        # "/guess - Бот угадает\n"
-        # "/tictactoe - Игра в крестики-нолики\n"
-        "/source - Исходный код на Github**", reply_to_message_id=message.id)
+async def help_command(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    help_text = "Доступные команды:\n\n" \
+                "/start - 🚀 Начало работы\n" \
+                "/help - ℹ️ Справка\n" \
+                "/detail - 📋 Поддерживаемые расширения\n"
+    if config['features']['imagegen']:
+        help_text += "/imagegen - 🎨 Текст в изображение\n"
+    if config['features']['musicgen']:
+        help_text += "/musicgen - 🎵 Текст в музыку\n"
+    if config['features']['3dgen']:
+        help_text += "/3dgen - 🧊 Текст в 3D\n"
+    if config['features']['bloom']:
+        help_text += "/bloom - ✍️ AI-генератор статей\n"
+    help_text += "/cancel - ❌ Отмена\n" \
+                 "/rename - ✏️ Переименовать файл\n" \
+                 "/read - 📖 Прочитать файл\n" \
+                 "/make - 📝 Создать файл\n"
+    if config['features']['guess']:
+        help_text += "/guess - 🤔 Бот угадает\n"
+    if config['features']['tictactoe']:
+        help_text += "/tictactoe - 🕹️ Игра в крестики-нолики\n"
+    help_text += "/source - 👨‍💻 Исходный код на Github"
+    
+    oldm = await app.send_message(message.chat.id, help_text, reply_to_message_id=message.id)
     dm = threading.Thread(target=lambda:dltmsg(message,oldm),daemon=True)
     dm.start()
 
 
 #source
 @app.on_message(filters.command(['source']))
-def source(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    oldm = app.send_message(message.chat.id, "**__GITHUB__ - https://github.com/bipinkrish/File-Converter-Bot**", disable_web_page_preview=True, reply_to_message_id=message.id)
+async def source(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    oldm = await app.send_message(message.chat.id, "**GITHUB** - https://github.com/bipinkrish/File-Converter-Bot", disable_web_page_preview=True, reply_to_message_id=message.id)
     dm = threading.Thread(target=lambda:dltmsg(message,oldm),daemon=True)
     dm.start() 
 
 
 # rename
 @app.on_message(filters.command(['rename']))
-def rename(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+@check_subscription
+async def rename(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     try:
         newname = message.text.split("/rename ")[1]
     except:
-        app.send_message(message.chat.id, "__Использование: **/rename новое-имя-файла**\n(с указанием расширения)__",
+        await app.send_message(message.chat.id, "Использование: `/rename новое-имя-файла`\n(с указанием расширения)",
                          reply_to_message_id=message.id)
         return
 
     nmessage, msg_type = getSavedMsg(message)
     if nmessage:
-        oldm = app.send_message(message.chat.id, "__**Переименование**__", reply_markup=ReplyKeyboardRemove(),
+        oldm = await app.send_message(message.chat.id, "**Переименование...**",
                                 reply_to_message_id=nmessage.id)
         rn = threading.Thread(target=lambda:rname(nmessage,newname,oldm),daemon=True)
         rn.start()
         removeSavedMsg(message)
     else:
-        app.send_message(message.chat.id, "__Сначала нужно отправить мне файл__", reply_to_message_id=message.id)
+        await app.send_message(message.chat.id, "Сначала нужно отправить мне файл", reply_to_message_id=message.id)
 
 
 # cancel
 @app.on_message(filters.command(['cancel']))
-def cancel(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+@check_subscription
+async def cancel(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     nmessage, msg_type = getSavedMsg(message)
     if nmessage:
         removeSavedMsg(message)
-        app.delete_messages(message.chat.id,message_ids=nmessage.id+1)
-        app.send_message(message.chat.id,"__Ваша задача была **Отменена**__",reply_markup=ReplyKeyboardRemove(), reply_to_message_id=message.id)
+        await app.delete_messages(message.chat.id,message_ids=nmessage.id+1)
+        await app.send_message(message.chat.id,"Ваша задача была **Отменена**", reply_to_message_id=message.id)
     else:
-        app.send_message(message.chat.id,"__Нет задач для отмены__", reply_to_message_id=message.id)
+        await app.send_message(message.chat.id,"Нет задач для отмены", reply_to_message_id=message.id)
 
-'''
+
 # imagen command
 @app.on_message(filters.command(["imagegen"]))
-def getpompt(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    
-	# getting prompt from the text
-	try:
-		prompt = message.text.split("/imagegen ")[1]
-	except:
-		app.send_message(message.chat.id,'__Send Prompt with Command,\nUsage :__ **/imagegen dog with funny hat**', reply_to_message_id=message.id)
-		return	
+@check_subscription
+async def getpompt_image(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    if not config['features']['imagegen']:
+        await message.reply_text("Эта функция отключена.")
+        return
+    try:
+        prompt = message.text.split("/imagegen ")[1]
+    except:
+        await app.send_message(message.chat.id,'Отправьте запрос с командой,\nПример: `/imagegen dog with funny hat`', reply_to_message_id=message.id)
+        return	
 
-	# threding	
-	msg = app.send_message(message.chat.id,"__Prompt received and Request is sent. Waiting time is 1-2 mins__", reply_to_message_id=message.id)
-	ai = threading.Thread(target=lambda:genrateimages(message,prompt,msg),daemon=True)
-	ai.start()
+    msg = await app.send_message(message.chat.id,"Запрос получен, ожидание 1-2 минуты...", reply_to_message_id=message.id)
+    ai = threading.Thread(target=lambda:genrateimages(message,prompt,msg),daemon=True)
+    ai.start()
 
 
 # music gen
 @app.on_message(filters.command(["musicgen"]))
-def getpompt(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    
-	# getting prompt from the text
-	try:
-		prompt = message.text.split("/musicgen ")[1]
-	except:
-		app.send_message(message.chat.id,'__Send Prompt with Command,\nUsage :__ **/musicgen a slow, emotional piano ballad in the key of C Major with a tempo of 60 BPM and a time signature of 4/4.**', reply_to_message_id=message.id)
-		return	
+@check_subscription
+async def getpompt_music(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    if not config['features']['musicgen']:
+        await message.reply_text("Эта функция отключена.")
+        return
+    try:
+        prompt = message.text.split("/musicgen ")[1]
+    except:
+        await app.send_message(message.chat.id,'Отправьте запрос с командой,\nПример: `/musicgen a slow, emotional piano ballad`', reply_to_message_id=message.id)
+        return	
 
-	# threding	
-	msg = app.send_message(message.chat.id,"__Prompt received and Request is sent. Waiting time is 1 minute__", reply_to_message_id=message.id)
-	mai = threading.Thread(target=lambda:genratemusic(message,prompt,msg),daemon=True)
-	mai.start()
-'''
+    msg = await app.send_message(message.chat.id,"Запрос получен, ожидание 1 минута...", reply_to_message_id=message.id)
+    mai = threading.Thread(target=lambda:genratemusic(message,prompt,msg),daemon=True)
+    mai.start()
+
 
 # read command
 @app.on_message(filters.command(['read']))
-def readcmd(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+@check_subscription
+async def readcmd(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     nmessage, msg_type = getSavedMsg(message)
     if nmessage:
         removeSavedMsg(message)
     else:
-        app.send_message(message.chat.id,'__Сначала отправьте мне файл__', reply_to_message_id=message.id)
+        await app.send_message(message.chat.id,'Сначала отправьте мне файл', reply_to_message_id=message.id)
         return
 
-    oldm = app.send_message(message.chat.id,'__Чтение файла__', reply_to_message_id=message.id)
+    oldm = await app.send_message(message.chat.id,'Чтение файла... 📖', reply_to_message_id=message.id)
     rf = threading.Thread(target=lambda:readf(nmessage,oldm),daemon=True)
     rf.start()
 
 
 # make command
 @app.on_message(filters.command(['make']))
-def makecmd(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+@check_subscription
+async def makecmd(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     nmessage, msg_type = getSavedMsg(message)
     if nmessage:
         removeSavedMsg(message)
@@ -1063,261 +1097,287 @@ def makecmd(client: pyrogram.client.Client, message: pyrogram.types.messages_and
         try:
             text = str(message.reply_to_message.text)
         except:
-            app.send_message(message.chat.id,'__Вам нужно сначала отправить мне текстовое сообщение или ответить на текстовое сообщение__', reply_to_message_id=message.id)
+            await app.send_message(message.chat.id,'Вам нужно сначала отправить мне текстовое сообщение или ответить на текстовое сообщение', reply_to_message_id=message.id)
             return
 
-    oldm = app.send_message(message.chat.id,'__Создание файла__', reply_to_message_id=message.id)
+    oldm = await app.send_message(message.chat.id,'Создание файла... 📝', reply_to_message_id=message.id)
     mf = threading.Thread(target=lambda:makefile(message,text,oldm),daemon=True)
     mf.start()
 
-'''
+
 # Point E
 @app.on_message(filters.command(["3dgen"]))
-def send_gpt(client: pyrogram.client.Client,message: pyrogram.types.messages_and_media.message.Message,):
+@check_subscription
+async def send_gpt(client: pyrogram.client.Client,message: pyrogram.types.messages_and_media.message.Message,):
+    if not config['features']['3dgen']:
+        await message.reply_text("Эта функция отключена.")
+        return
     try: prompt = message.text.split("/3dgen ")[1]
     except:
-        app.send_message(message.chat.id,'__Send Prompt with Command,\nUsage :__ **/3dgen a red motorcycle**', reply_to_message_id=message.id)
+        await app.send_message(message.chat.id,'Отправьте запрос с командой,\nПример: `/3dgen a red motorcycle`', reply_to_message_id=message.id)
         return	
 
-    msg = message.reply_text("__3Dizing...__", reply_to_message_id=message.id)
+    msg = await message.reply_text("3D-моделирование... 🧊", reply_to_message_id=message.id)
     pnte = threading.Thread(target=lambda:textTo3d(prompt,message,msg),daemon=True)
     pnte.start()
 
 
 # Tic Tac Toe Game
 @app.on_message(filters.command("tictactoe"))
-def startTTT(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-	if message.chat.id == message.from_user.id: 
-		return tictactoe.TTTgame(app,None,message,1)
+@check_subscription
+async def startTTT(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    if not config['features']['tictactoe']:
+        await message.reply_text("Эта функция отключена.")
+        return
+    if message.chat.id == message.from_user.id: 
+		    return tictactoe.TTTgame(app,None,message,1)
 
-	else:
-		msg = app.send_message(message.chat.id, f'__Player 1 (X) : **{message.from_user.first_name}**__',
+    else:
+        msg = await app.send_message(message.chat.id, f'Игрок 1 (X) : **{message.from_user.first_name}**',
 		reply_markup=InlineKeyboardMarkup(
-		[[ InlineKeyboardButton( text='🤵 Player 2', callback_data="TTT P2")],
+		[[ InlineKeyboardButton( text='🤵 Игрок 2', callback_data="TTT P2")],
 		 [ InlineKeyboardButton( text='🤖 v/s AI', callback_data="TTT AI")]]))
-		tictactoe.TTTstoredata(msg.id, p1=message.from_user.id)
+        tictactoe.TTTstoredata(msg.id, p1=message.from_user.id)
 
 
 # Guess Game
 @app.on_message(filters.command(['guess']))
-def startG(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-
+@check_subscription
+async def startG(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    if not config['features']['guess']:
+        await message.reply_text("Эта функция отключена.")
+        return
     try:
         N = int(message.text.split("/guess ")[1])
         if N > 1000:
-            app.send_message(message.chat.id,"**Not more than 1000**",reply_to_message_id=message.id)
+            await app.send_message(message.chat.id,"**Не более 1000**",reply_to_message_id=message.id)
             return
     except: N = 100
 
     size = len(bin(N).replace("0b", ""))
-    app.send_message(message.chat.id,f"__Take a Number between__ **1 - {N}**\n__I will guess it in__ **{size} steps**\n__are you__ **ready ?**",reply_to_message_id=message.id,
+    await app.send_message(message.chat.id,f"Загадайте число от **1** до **{N}**\nЯ угадаю его за **{size} шагов**\nВы **готовы?**",reply_to_message_id=message.id,
         reply_markup=InlineKeyboardMarkup(
                 [[
-                    InlineKeyboardButton( text='Yes', callback_data='G ready'),
-                    InlineKeyboardButton( text='No', callback_data='G not')
+                    InlineKeyboardButton( text='Да', callback_data='G ready'),
+                    InlineKeyboardButton( text='Нет', callback_data='G not')
                 ]]))
  
 
 # bloom 
 @app.on_message(filters.command("bloom"))
-def bloomcmd(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+@check_subscription
+async def bloomcmd(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    if not config['features']['bloom']:
+        await message.reply_text("Эта функция отключена.")
+        return
     try: para = message.reply_to_message.text
     except:
         try: para = message.text.split("/bloom ")[1]
         except:
-            app.send_message(message.chat.id,'__Send Para with Command or Reply to it\n\nUsage :__ **/bloom A poem about the beauty of science**', reply_to_message_id=message.id)
+            await app.send_message(message.chat.id,'Отправьте текст с командой или ответьте на сообщение\n\nПример: `/bloom A poem about the beauty of science`', reply_to_message_id=message.id)
             return	
     
-    msg = message.reply_text("__Blooming...__", reply_to_message_id=message.id)
+    msg = await message.reply_text("Генерация... ✍️", reply_to_message_id=message.id)
     blm = threading.Thread(target=lambda:handelbloom(para,message,msg),daemon=True)
     blm.start()
-'''
+
 
 # callback
 @app.on_callback_query()
-def inbtwn(client: pyrogram.client.Client, call: pyrogram.types.CallbackQuery):
-	if call.data[:4] == "TTT ": return tictactoe.TTTgame(app,call,call.message)
-	elif call.data[:2] == "G ": return guess.Ggame(app,call)
+async def inbtwn(client: pyrogram.client.Client, call: pyrogram.types.CallbackQuery):
+	if call.data[:4] == "TTT ":
+		if config['features']['tictactoe']:
+			await tictactoe.TTTgame(app,call,call.message)
+	elif call.data[:2] == "G ":
+		if config['features']['guess']:
+			await guess.Ggame(app,call)
 
 
 # document
 @app.on_message(filters.document)
-def documnet(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+@check_subscription
+async def documnet(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     saveMsg(message, "DOCUMENT")
     dext = message.document.file_name.split(".")[-1].upper()
 
     # VID / AUD
     if message.document.file_name.upper().endswith(VIDAUD):
-        app.send_message(message.chat.id,
-                         f'__Обнаружено расширение:__ **{dext}** 📹 / 🔊\n__Теперь отправьте расширение для конвертации...__\n\n'
-                         f'--**Доступные форматы**-- \n\n__{VA_TEXT}__\n\n{message.from_user.mention} __выберите или '
-                         f'нажмите /cancel для отмены или используйте /rename для переименования__',
+        await app.send_message(message.chat.id,
+                         f'Обнаружено расширение: **{dext}** 📹 / 🔊\nТеперь отправьте расширение для конвертации...\n\n'
+                         f'--**Доступные форматы**-- \n\n`{VA_TEXT}`\n\n{message.from_user.mention} выберите или '
+                         f'нажмите /cancel для отмены или используйте /rename для переименования',
                          reply_markup=VAboard, reply_to_message_id=message.id)
 
     # IMG
     elif message.document.file_name.upper().endswith(IMG):
-        # f'**SPECIAL** 🎁\n__Colorize, Positive, Upscale & Scan__\n\n'
-        app.send_message(message.chat.id,
-                         f'__Обнаружено расширение:__ **{dext}** 📷\n__Теперь отправьте расширение для конвертации...__\n\n'
-                         f'--**Доступные форматы**-- \n\n__{IMG_TEXT}__\n\n'
-                         f'{message.from_user.mention} __выберите или нажмите /cancel для отмены или используйте '
-                         f'/rename для переименования__',
+        await app.send_message(message.chat.id,
+                         f'Обнаружено расширение: **{dext}** 📷\nТеперь отправьте расширение для конвертации...\n\n'
+                         f'--**Доступные форматы**-- \n\n`{IMG_TEXT}`\n\n'
+                         f'{message.from_user.mention} выберите или нажмите /cancel для отмены или используйте '
+                         f'/rename для переименования',
                          reply_markup=IMGboard, reply_to_message_id=message.id)
 
     # LBW
     elif message.document.file_name.upper().endswith(LBW):
-        app.send_message(message.chat.id,
-                         f'__Обнаружено расширение:__ **{dext}** 💼 \n__Теперь отправьте расширение для конвертации...__\n\n--**Доступные форматы**-- \n\n__{LBW_TEXT}__\n\n{message.from_user.mention} __выберите или нажмите /cancel для отмены или используйте /rename для переименования__',
+        await app.send_message(message.chat.id,
+                         f'Обнаружено расширение: **{dext}** 💼 \nТеперь отправьте расширение для конвертации...\n\n--**Доступные форматы**-- \n\n`{LBW_TEXT}`\n\n{message.from_user.mention} выберите или нажмите /cancel для отмены или используйте /rename для переименования',
                          reply_markup=LBWboard, reply_to_message_id=message.id)
 
     # LBC
     elif message.document.file_name.upper().endswith(LBC):
-        app.send_message(message.chat.id,
-                         f'__Обнаружено расширение:__ **{dext}** 💼 \n__Теперь отправьте расширение для конвертации...__\n\n--**Доступные форматы**-- \n\n__{LBC_TEXT}__\n\n{message.from_user.mention} __выберите или нажмите /cancel для отмены или используйте /rename для переименования__',
+        await app.send_message(message.chat.id,
+                         f'Обнаружено расширение: **{dext}** 💼 \nТеперь отправьте расширение для конвертации...\n\n--**Доступные форматы**-- \n\n`{LBC_TEXT}`\n\n{message.from_user.mention} выберите или нажмите /cancel для отмены или используйте /rename для переименования',
                          reply_markup=LBCboard, reply_to_message_id=message.id)
 
     # LBI
     elif message.document.file_name.upper().endswith(LBI):
-        app.send_message(message.chat.id,
-                         f'__Обнаружено расширение:__ **{dext}** 💼 \n__Теперь отправьте расширение для конвертации...__\n\n--**Доступные форматы**-- \n\n__{LBI_TEXT}__\n\n{message.from_user.mention} __выберите или нажмите /cancel для отмены или используйте /rename для переименования__',
+        await app.send_message(message.chat.id,
+                         f'Обнаружено расширение: **{dext}** 💼 \nТеперь отправьте расширение для конвертации...\n\n--**Доступные форматы**-- \n\n`{LBI_TEXT}`\n\n{message.from_user.mention} выберите или нажмите /cancel для отмены или используйте /rename для переименования',
                          reply_markup=LBIboard, reply_to_message_id=message.id)
 
     # FF
     elif message.document.file_name.upper().endswith(FF):
-        app.send_message(message.chat.id,
-                         f'__Обнаружено расширение:__ **{dext}** 🔤 \n__Теперь отправьте расширение для конвертации...__\n\n--**Доступные форматы**-- \n\n__{FF_TEXT}__\n\n{message.from_user.mention} __выберите или нажмите /cancel для отмены или используйте /rename для переименования__',
+        await app.send_message(message.chat.id,
+                         f'Обнаружено расширение: **{dext}** 🔤 \nТеперь отправьте расширение для конвертации...\n\n--**Доступные форматы**-- \n\n`{FF_TEXT}`\n\n{message.from_user.mention} выберите или нажмите /cancel для отмены или используйте /rename для переименования',
                          reply_markup=FFboard, reply_to_message_id=message.id)
 
     # EB
     elif message.document.file_name.upper().endswith(EB):
-        app.send_message(message.chat.id,
-                         f'__Обнаружено расширение:__ **{dext}** 📚 \n__Теперь отправьте расширение для конвертации...__\n\n--**Доступные форматы**-- \n\n__{EB_TEXT}__\n\n{message.from_user.mention} __выберите или нажмите /cancel для отмены или используйте /rename для переименования__',
+        await app.send_message(message.chat.id,
+                         f'Обнаружено расширение: **{dext}** 📚 \nТеперь отправьте расширение для конвертации...\n\n--**Доступные форматы**-- \n\n`{EB_TEXT}`\n\n{message.from_user.mention} выберите или нажмите /cancel для отмены или используйте /rename для переименования',
                          reply_markup=EBboard, reply_to_message_id=message.id)
 
     # ARC
     elif message.document.file_name.upper().endswith(ARC):
-        app.send_message(message.chat.id,
-                         f'__Обнаружено расширение:__ **{dext}** 🗄\n__Хотите извлечь файлы?__\n\n{message.from_user.mention} __выберите или нажмите /cancel для отмены или используйте /rename для переименования__',
+        await app.send_message(message.chat.id,
+                         f'Обнаружено расширение: **{dext}** 🗄\nХотите извлечь файлы?\n\n{message.from_user.mention} выберите или нажмите /cancel для отмены или используйте /rename для переименования',
                          reply_markup=ARCboard, reply_to_message_id=message.id)
 
     # TOR
     elif message.document.file_name.upper().endswith("TORRENT"):
         removeSavedMsg(message)
-        oldm = app.send_message(message.chat.id, '__Получение Magnet-ссылки__', reply_to_message_id=message.id)
+        oldm = await app.send_message(message.chat.id, 'Получение Magnet-ссылки... 🔗', reply_to_message_id=message.id)
         ml = threading.Thread(target=lambda: getmag(message, oldm), daemon=True)
         ml.start()
         return
 
     # SUB
     elif message.document.file_name.upper().endswith(SUB):
-        app.send_message(message.chat.id,
-                         f'__Обнаружено расширение:__ **{dext}** 🗯️ \n__Теперь отправьте расширение для конвертации...__\n\n--**Доступные форматы**-- \n\n__{SUB_TEXT}__\n\n{message.from_user.mention} __выберите или нажмите /cancel для отмены или используйте /rename для переименования__',
+        await app.send_message(message.chat.id,
+                         f'Обнаружено расширение: **{dext}** 🗯️ \nТеперь отправьте расширение для конвертации...\n\n--**Доступные форматы**-- \n\n`{SUB_TEXT}`\n\n{message.from_user.mention} выберите или нажмите /cancel для отмены или используйте /rename для переименования',
                          reply_markup=SUBboard, reply_to_message_id=message.id)
 
     # PRO
     elif message.document.file_name.upper().endswith(PRO):
-        app.send_message(message.chat.id,
-                         f'__Обнаружено расширение:__ **{dext}** 👨‍💻 \n__Теперь отправьте расширение для конвертации...__\n\n--**Доступные форматы**-- \n\n__{PRO_TEXT}__\n\n{message.from_user.mention} __выберите или нажмите /cancel для отмены или используйте /rename для переименования__',
+        await app.send_message(message.chat.id,
+                         f'Обнаружено расширение: **{dext}** 👨‍💻 \nТеперь отправьте расширение для конвертации...\n\n--**Доступные форматы**-- \n\n`{PRO_TEXT}`\n\n{message.from_user.mention} выберите или нажмите /cancel для отмены или используйте /rename для переименования',
                          reply_markup=PROboard, reply_to_message_id=message.id)
 
     # T3D
     elif message.document.file_name.upper().endswith(T3D):
-        app.send_message(message.chat.id,
-                         f'__Обнаружено расширение:__ **{dext}** 💠 \n__Теперь отправьте расширение для конвертации...__\n\n--**Доступные форматы**-- \n\n__{T3D_TEXT}__\n\n{message.from_user.mention} __выберите или нажмите /cancel для отмены или используйте /rename для переименования__',
+        await app.send_message(message.chat.id,
+                         f'Обнаружено расширение: **{dext}** 💠 \nТеперь отправьте расширение для конвертации...\n\n--**Доступные форматы**-- \n\n`{T3D_TEXT}`\n\n{message.from_user.mention} выберите или нажмите /cancel для отмены или используйте /rename для переименования',
                          reply_markup=T3Dboard, reply_to_message_id=message.id)
 
     # else
     else:
-        app.send_message(message.chat.id,
-                         '__Доступные конвертации не найдены.\n\nВы можете использовать:__\n**/rename новое-имя-файла** __для переименования__\n**/read** __для чтения файла__')
+        await app.send_message(message.chat.id,
+                         'Доступные конвертации не найдены.\n\nВы можете использовать:\n`/rename новое-имя-файла` для переименования\n`/read` для чтения файла')
 
 # animation
 @app.on_message(filters.animation)
-def annimations(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    oldm = app.send_message(message.chat.id,'**Преобразую в документ, затем вы сможете использовать его для конвертации**',reply_markup=ReplyKeyboardRemove(), reply_to_message_id=message.id)
+@check_subscription
+async def annimations(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    oldm = await app.send_message(message.chat.id,'**Преобразую в документ, затем вы сможете использовать его для конвертации**', reply_to_message_id=message.id)
     sd = threading.Thread(target=lambda:senddoc(message,oldm),daemon=True)
     sd.start()
 
 
 # video
 @app.on_message(filters.video)
-def video(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+@check_subscription
+async def video(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     try:
         if message.video.file_name.upper().endswith(VIDAUD):
             saveMsg(message, "VIDEO")
             dext = message.video.file_name.split(".")[-1].upper()
-            app.send_message(message.chat.id,
-                             f'__Обнаружено расширение:__ **{dext}** 📹 / 🔊\n__Теперь отправьте расширение для конвертации...__\n\n--**Доступные форматы**-- \n\n__{VA_TEXT}__\n\n{message.from_user.mention} __выберите или нажмите /cancel для отмены или используйте /rename для переименования__',
+            await app.send_message(message.chat.id,
+                             f'Обнаружено расширение: **{dext}** 📹 / 🔊\nТеперь отправьте расширение для конвертации...\n\n--**Доступные форматы**-- \n\n`{VA_TEXT}`\n\n{message.from_user.mention} выберите или нажмите /cancel для отмены или используйте /rename для переименования',
                              reply_markup=VAboard, reply_to_message_id=message.id)
         else:
-            app.send_message(message.chat.id, f'--**Доступные форматы**--:\n\n**ВИДЕО/АУДИО** 📹 / 🔊\n__{VA_TEXT}__',
+            await app.send_message(message.chat.id, f'--**Доступные форматы**--:\n\n**ВИДЕО/АУДИО** 📹 / 🔊\n`{VA_TEXT}`',
                              reply_to_message_id=message.id)
 
     except:
-        oldm = app.send_message(message.chat.id,
+        oldm = await app.send_message(message.chat.id,
                                 '**Преобразую в документ, затем вы сможете использовать его для конвертации**',
-                                reply_markup=ReplyKeyboardRemove())
+                                )
         sd = threading.Thread(target=lambda: senddoc(message, oldm), daemon=True)
         sd.start()
 
 
 # video note
 @app.on_message(filters.video_note)
-def videonote(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+@check_subscription
+async def videonote(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     saveMsg(message, "VIDEO_NOTE")
-    app.send_message(message.chat.id,
-                f'__Обнаружено расширение:__ **MP4** 📹 / 🔊\n__Теперь отправьте расширение для конвертации...__\n\n--**Доступные форматы**-- \n\n__{VA_TEXT}__\n\n{message.from_user.mention} __выберите или нажмите /cancel для отмены или используйте /rename для переименования__',
+    await app.send_message(message.chat.id,
+                f'Обнаружено расширение: **MP4** 📹 / 🔊\nТеперь отправьте расширение для конвертации...\n\n--**Доступные форматы**-- \n\n`{VA_TEXT}`\n\n{message.from_user.mention} выберите или нажмите /cancel для отмены или используйте /rename для переименования',
                 reply_markup=VAboard, reply_to_message_id=message.id)
 
 # audio
 @app.on_message(filters.audio)
-def audio(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+@check_subscription
+async def audio(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     if message.audio.file_name.upper().endswith(VIDAUD):
         saveMsg(message, "AUDIO")
         dext = message.audio.file_name.split(".")[-1].upper()
-        app.send_message(message.chat.id,
-                         f'__Обнаружено расширение:__ **{dext}** 📹 / 🔊\n__Теперь отправьте расширение для конвертации...__\n\n--**Доступные форматы**-- \n\n__{VA_TEXT}__\n\n{message.from_user.mention} __выберите или нажмите /cancel для отмены или используйте /rename для переименования__',
+        await app.send_message(message.chat.id,
+                         f'Обнаружено расширение: **{dext}** 📹 / 🔊\nТеперь отправьте расширение для конвертации...\n\n--**Доступные форматы**-- \n\n`{VA_TEXT}`\n\n{message.from_user.mention} выберите или нажмите /cancel для отмены или используйте /rename для переименования',
                          reply_markup=VAboard, reply_to_message_id=message.id)
     else:
-        app.send_message(message.chat.id, f'--**Доступные форматы**--:\n\n**ВИДЕО/АУДИО** 📹 / 🔊 \n__{VIDAUD}__',
+        await app.send_message(message.chat.id, f'--**Доступные форматы**--:\n\n**ВИДЕО/АУДИО** 📹 / 🔊 \n`{VIDAUD}`',
                          reply_to_message_id=message.id)
 
 # voice
 @app.on_message(filters.voice)
-def voice(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+@check_subscription
+async def voice(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     saveMsg(message, "VOICE")
-    app.send_message(message.chat.id,
-                f'__Обнаружено расширение:__ **OGG** 📹 / 🔊\n__Теперь отправьте расширение для конвертации...__\n\n--**Доступные форматы**-- \n\n__{VA_TEXT}__\n\n{message.from_user.mention} __выберите или нажмите /cancel для отмены или используйте /rename для переименования__',
+    await app.send_message(message.chat.id,
+                f'Обнаружено расширение: **OGG** 📹 / 🔊\nТеперь отправьте расширение для конвертации...\n\n--**Доступные форматы**-- \n\n`{VA_TEXT}`\n\n{message.from_user.mention} выберите или нажмите /cancel для отмены или используйте /rename для переименования',
                 reply_markup=VAboard, reply_to_message_id=message.id)
 
 # photo
 @app.on_message(filters.photo)
-def photo(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+@check_subscription
+async def photo(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     saveMsg(message, "PHOTO")
-    # f'**SPECIAL** 🎁\n__Colorize, Positive, Upscale & Scan__\n\n{message.from_user.mention} __choose '
-    app.send_message(message.chat.id,
-                     f'__Обнаружено расширение:__ **JPG** 📷\n__Теперь отправьте расширение для конвертации...__\n\n'
-                     f'--**Доступные форматы**-- \n\n__{IMG_TEXT}__\n\n'
-                     f'или нажмите /cancel для отмены или используйте /rename для переименования__',
+    await app.send_message(message.chat.id,
+                     f'Обнаружено расширение: **JPG** 📷\nТеперь отправьте расширение для конвертации...\n\n'
+                     f'--**Доступные форматы**-- \n\n`{IMG_TEXT}`\n\n'
+                     f'или нажмите /cancel для отмены или используйте /rename для переименования',
                      reply_markup=IMGboard, reply_to_message_id=message.id)
 
 # sticker
 @app.on_message(filters.sticker)
-def sticker(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+@check_subscription
+async def sticker(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     saveMsg(message, "STICKER")
     if not message.sticker.is_animated and not message.sticker.is_video:
-        app.send_message(message.chat.id,
-                     f'__Обнаружено расширение:__ **WEBP** 📷\n__Теперь отправьте расширение для конвертации...__\n\n--**Доступные форматы**-- \n\n__{IMG_TEXT}__\n\n**СПЕЦИАЛЬНОЕ** 🎁\n__Colorize, Positive, Upscale & Scan__\n\n{message.from_user.mention} __выберите или нажмите /cancel для отмены или используйте /rename для переименования__',
+        await app.send_message(message.chat.id,
+                     f'Обнаружено расширение: **WEBP** 📷\nТеперь отправьте расширение для конвертации...\n\n--**Доступные форматы**-- \n\n`{IMG_TEXT}`\n\n**СПЕЦИАЛЬНОЕ** 🎁\nColorize, Positive, Upscale & Scan\n\n{message.from_user.mention} выберите или нажмите /cancel для отмены или используйте /rename для переименования',
                      reply_markup=IMGboard, reply_to_message_id=message.id)
     else:
-        app.send_message(message.chat.id,
-                    f'__Обнаружено расширение:__ **TGS** 📷\n__Теперь отправьте расширение для конвертации...__\n\n--**Доступные форматы**-- \n\n__{IMG_TEXT}__\n\n**СПЕЦИАЛЬНОЕ** 🎁\n__Colorize, Positive, Upscale & Scan__\n\n{message.from_user.mention} __выберите или нажмите /cancel для отмены или используйте /rename для переименования__',
+        await app.send_message(message.chat.id,
+                    f'Обнаружено расширение: **TGS** 📷\nТеперь отправьте расширение для конвертации...\n\n--**Доступные форматы**-- \n\n`{IMG_TEXT}`\n\n**СПЕЦИАЛЬНОЕ** 🎁\nColorize, Positive, Upscale & Scan\n\n{message.from_user.mention} выберите или нажмите /cancel для отмены или используйте /rename для переименования',
                     reply_markup=IMGboard, reply_to_message_id=message.id)
 
 
 # conversion starts here
 @app.on_message(filters.text)
-def text(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+@check_subscription
+async def text(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     # save restricted
     if "https://t.me/" in message.text:
         mf = threading.Thread(target=lambda: saverec(message), daemon=True)
@@ -1326,7 +1386,7 @@ def text(client: pyrogram.client.Client, message: pyrogram.types.messages_and_me
 
     # magnet link
     if message.text[:8] == "magnet:?":
-        oldm = app.send_message(message.chat.id, '__Обработка...__', reply_to_message_id=message.id)
+        oldm = await app.send_message(message.chat.id, 'Обработка... ⏳', reply_to_message_id=message.id)
         tf = threading.Thread(target=lambda: gettorfile(message, oldm), daemon=True)
         tf.start()
         return
@@ -1335,94 +1395,109 @@ def text(client: pyrogram.client.Client, message: pyrogram.types.messages_and_me
     nmessage, msg_type = getSavedMsg(message)
     if nmessage:
         removeSavedMsg(message)
-        app.delete_messages(message.chat.id, message_ids=nmessage.id + 1)
+        await app.delete_messages(message.chat.id, message_ids=nmessage.id + 1)
 
         if "COLOR" == message.text:
-            return
-            oldm = app.send_message(message.chat.id, '__Обработка__', reply_markup=ReplyKeyboardRemove(),
+            if not config['features']['colorize']:
+                await message.reply_text("Эта функция отключена.")
+                return
+            oldm = await app.send_message(message.chat.id, 'Обработка... 🎨',
                                     reply_to_message_id=nmessage.id)
             col = threading.Thread(target=lambda: colorizeimage(nmessage, oldm), daemon=True)
             col.start()
 
         elif "POSITIVE" == message.text:
-            return
-            oldm = app.send_message(message.chat.id, '__Обработка__', reply_markup=ReplyKeyboardRemove(),
+            if not config['features']['positive']:
+                await message.reply_text("Эта функция отключена.")
+                return
+            oldm = await app.send_message(message.chat.id, 'Обработка... ✨',
                                     reply_to_message_id=nmessage.id)
             pos = threading.Thread(target=lambda: negetivetopostive(nmessage, oldm), daemon=True)
             pos.start()
 
         elif "READ" == message.text:
-            oldm = app.send_message(message.chat.id, '__Чтение файла__', reply_markup=ReplyKeyboardRemove(),
+            oldm = await app.send_message(message.chat.id, 'Чтение файла... 📖',
                                     reply_to_message_id=nmessage.id)
             rf = threading.Thread(target=lambda: readf(nmessage, oldm), daemon=True)
             rf.start()
 
         elif "SENDPHOTO" == message.text:
-            oldm = app.send_message(message.chat.id, '__Отправка в формате фото__', reply_markup=ReplyKeyboardRemove(),
+            oldm = await app.send_message(message.chat.id, 'Отправка в формате фото... 🖼️',
                                     reply_to_message_id=nmessage.id)
             sp = threading.Thread(target=lambda: sendphoto(nmessage, oldm), daemon=True)
             sp.start()
 
         elif "SENDDOC" == message.text:
-            oldm = app.send_message(message.chat.id, '__Отправка в формате документа__',
-                                    reply_markup=ReplyKeyboardRemove(), reply_to_message_id=nmessage.id)
+            oldm = await app.send_message(message.chat.id, 'Отправка в формате документа... 📄',
+                                     reply_to_message_id=nmessage.id)
             sd = threading.Thread(target=lambda: senddoc(nmessage, oldm), daemon=True)
             sd.start()
 
         elif "SENDVID" == message.text:
-            oldm = app.send_message(message.chat.id, '__Отправка в потоковом формате__',
-                                    reply_markup=ReplyKeyboardRemove(), reply_to_message_id=nmessage.id)
+            oldm = await app.send_message(message.chat.id, 'Отправка в потоковом формате... 🎥',
+                                     reply_to_message_id=nmessage.id)
             sv = threading.Thread(target=lambda: sendvideo(nmessage, oldm), daemon=True)
             sv.start()
 
         elif "SpeechToText" == message.text:
-            return
-            oldm = app.send_message(message.chat.id, '__Транскрибация, для длинных файлов требуется больше времени__',
-                                    reply_markup=ReplyKeyboardRemove(), reply_to_message_id=nmessage.id)
+            if not config['features']['speech_to_text']:
+                await message.reply_text("Эта функция отключена.")
+                return
+            oldm = await app.send_message(message.chat.id, 'Транскрибация, для длинных файлов требуется больше времени... 🎤',
+                                     reply_to_message_id=nmessage.id)
             stt = threading.Thread(target=lambda: transcript(nmessage, oldm), daemon=True)
             stt.start()
 
         elif "TextToSpeech" == message.text:
-            return
-            oldm = app.send_message(message.chat.id, '__Генерация речи__', reply_markup=ReplyKeyboardRemove(),
+            if not config['features']['text_to_speech']:
+                await message.reply_text("Эта функция отключена.")
+                return
+            oldm = await app.send_message(message.chat.id, 'Генерация речи... 🗣️',
                                     reply_to_message_id=nmessage.id)
             tts = threading.Thread(target=lambda: speak(nmessage, oldm), daemon=True)
             tts.start()
 
         elif "UPSCALE" == message.text:
-            return
-            oldm = app.send_message(message.chat.id, '__Увеличение разрешения вашего изображения__',
-                                    reply_markup=ReplyKeyboardRemove(), reply_to_message_id=nmessage.id)
+            if not config['features']['upscale']:
+                await message.reply_text("Эта функция отключена.")
+                return
+            oldm = await app.send_message(message.chat.id, 'Увеличение разрешения вашего изображения... 🖼️',
+                                     reply_to_message_id=nmessage.id)
             upscl = threading.Thread(target=lambda: increaseres(nmessage, oldm), daemon=True)
             upscl.start()
 
         elif "EXTRACT" == message.text:
-            oldm = app.send_message(message.chat.id, '__Извлечение файла__', reply_markup=ReplyKeyboardRemove(),
+            oldm = await app.send_message(message.chat.id, 'Извлечение файла... 📂',
                                     reply_to_message_id=nmessage.id)
             ex = threading.Thread(target=lambda: extract(nmessage, oldm), daemon=True)
             ex.start()
 
         elif "COMPILE" == message.text:
-            oldm = app.send_message(message.chat.id, '__Компиляция__', reply_markup=ReplyKeyboardRemove(),
+            oldm = await app.send_message(message.chat.id, 'Компиляция... ⚙️',
                                     reply_to_message_id=nmessage.id)
             cmp = threading.Thread(target=lambda: compile(nmessage, oldm), daemon=True)
             cmp.start()
 
         elif "SCAN" == message.text:
-            oldm = app.send_message(message.chat.id, '__Сканирование__', reply_markup=ReplyKeyboardRemove(),
+            if not config['features']['scan']:
+                await message.reply_text("Эта функция отключена.")
+                return
+            oldm = await app.send_message(message.chat.id, 'Сканирование... 🔬',
                                     reply_to_message_id=nmessage.id)
             scn = threading.Thread(target=lambda: scan(nmessage, oldm), daemon=True)
             scn.start()
 
         elif "RUN" == message.text:
-            oldm = app.send_message(message.chat.id, '__Запуск__', reply_markup=ReplyKeyboardRemove(),
+            oldm = await app.send_message(message.chat.id, 'Запуск... ▶️',
                                     reply_to_message_id=nmessage.id)
             rpro = threading.Thread(target=lambda: runpro(nmessage, oldm), daemon=True)
             rpro.start()
 
         elif "BG REMOVE" == message.text:
-            return
-            oldm = app.send_message(message.chat.id, '__Удаление фона__', reply_markup=ReplyKeyboardRemove(),
+            if not config['features']['bg_remove']:
+                await message.reply_text("Эта функция отключена.")
+                return
+            oldm = await app.send_message(message.chat.id, 'Удаление фона... 🏞️',
                                     reply_to_message_id=nmessage.id)
             bgrm = threading.Thread(target=lambda: bgremove(nmessage, oldm), daemon=True)
             bgrm.start()
@@ -1463,27 +1538,27 @@ def text(client: pyrogram.client.Client, message: pyrogram.types.messages_and_me
             print("File is a Video Note")
 
         elif msg_type == "PHOTO":
-            temp = app.download_media(nmessage)
+            temp = await app.download_media(nmessage)
             inputt = temp.split("/")[-1]
             os.remove(temp)
             print("File is a Photo")
 
         else:
             if str(message.from_user.id) == str(message.chat.id):
-                app.send_message(message.chat.id, '__Формат не поддерживается, свяжитесь с разработчиком__',
-                                 reply_to_message_id=nmessage.id, reply_markup=ReplyKeyboardRemove())
+                await app.send_message(message.chat.id, 'Формат не поддерживается, свяжитесь с разработчиком',
+                                 reply_to_message_id=nmessage.id)
             return
 
         newext = message.text.lower()
         oldext = inputt.split(".")[-1]
 
         if oldext.upper() == newext.upper():
-            app.send_message(message.chat.id, "__Хорошая попытка, не выбирайте то же самое расширение__",
-                             reply_to_message_id=nmessage.id, reply_markup=ReplyKeyboardRemove())
+            await app.send_message(message.chat.id, "Хорошая попытка, не выбирайте то же самое расширение 😉",
+                             reply_to_message_id=nmessage.id)
 
         else:
-            msg = app.send_message(message.chat.id, f'Конвертация из **{oldext.upper()}** в **{newext.upper()}**',
-                                   reply_to_message_id=nmessage.id, reply_markup=ReplyKeyboardRemove())
+            msg = await app.send_message(message.chat.id, f'Конвертация из **{oldext.upper()}** в **{newext.upper()}**',
+                                   reply_to_message_id=nmessage.id)
             conv = threading.Thread(target=lambda: follow(nmessage, inputt, newext, oldext, msg), daemon=True)
             conv.start()
 
@@ -1494,8 +1569,8 @@ def text(client: pyrogram.client.Client, message: pyrogram.types.messages_and_me
                 ots.start()
             else:
                 saveMsg(message, "TEXT")
-                app.send_message(message.chat.id,
-                                 '__для текстовых сообщений вы можете использовать **/make** чтобы создать файл из него.\n(первая строка текста будет использована как имя файла)__',
+                await app.send_message(message.chat.id,
+                                 'для текстовых сообщений вы можете использовать `/make` чтобы создать файл из него.\n(первая строка текста будет использована как имя файла)',
                                  reply_to_message_id=message.id)
 
 #apprun
