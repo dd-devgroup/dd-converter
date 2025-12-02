@@ -6,24 +6,45 @@
 
 ---
 
-## Переменные
-- `HASH` **_Ваш API Hash с my.telegram.org_**
-- `ID` **_Ваш API ID с my.telegram.org_**
-- `TOKEN` **_Токен вашего бота от @BotFather_**
+## Переменные окружения
+
+Для запуска бота необходимо создать файл `.env` в корне проекта и указать в нем следующие переменные:
+
+```
+TOKEN=ВАШ_ТЕЛЕГРАМ_ТОКЕН
+HASH=ВАШ_API_HASH
+ID=ВАШ_API_ID
+```
+
+- `TOKEN` **_Токен вашего бота от [@BotFather](https://t.me/botfather)_**
+- `HASH` **_Ваш API Hash с [my.telegram.org](https://my.telegram.org)_**
+- `ID` **_Ваш API ID с [my.telegram.org](https://my.telegram.org)_**
 
 ---
 
-## Локальный запуск
+## Локальный запуск через Docker
 
-Необходимо установить Docker или Docker Compose.
-Установите переменные окружения после клонирования, или можете изменить их напрямую в [строках 26-28 в main.py](https://github.com/bipinkrish/File-Converter-Bot/blob/main/main.py?plain=1#L26)
+Это рекомендуемый способ запуска, который автоматически настраивает все необходимое окружение.
 
-```
-git clone https://github.com/bipinkrish/File-Converter-Bot.git
-cd File-Converter-Bot
-docker build . -t File-Converter
-docker run File-Converter
-```
+1.  **Установите Docker и Docker Compose.**
+2.  **Склонируйте репозиторий:**
+    ```sh
+    git clone https://github.com/bipinkrish/File-Converter-Bot.git
+    cd File-Converter-Bot
+    ```
+3.  **Создайте и заполните `.env` файл**:
+    ```sh
+    nano .env
+    ```
+4.  **Отредактируйте файл `config.yaml`**:
+    ```sh
+    nano config.yaml
+    ```
+5.  **Запустите бота:**
+    ```sh
+    docker-compose up --build -d
+    ```
+
 
 ---
 
