@@ -1,0 +1,20 @@
+telegram:
+  news_channel_id: https://t.me/DenDenCommunity # новостной канал, юзер обязан подписаться на него для работы сервиса
+  support_channel_id: https://t.me/DenDenSupport # канал поддержки
+
+features:
+  imagegen: false
+  musicgen: false
+  '3dgen': false
+  bloom: false
+  guess: false
+  tictactoe: false
+  colorize: false
+  positive: false
+  upscale: false
+  scan: false
+  bg_remove: false
+  speech_to_text: false
+  text_to_speech: false
+  ai_chat: false
+  other_utils: false # b64, time, date, maths
