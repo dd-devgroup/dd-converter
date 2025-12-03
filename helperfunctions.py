@@ -101,8 +101,18 @@ def tesrctcommand(inputt,out):
 
 # ffmpeg cmd
 def ffmpegcommand(inputt,output,new):
-    #cmd = f'{ffmpeg} -i "{inputt}" "{output}"'
-    if new in  ["mp4", "mkv", "mov"] and not (new == "mov" and ".webm" in inputt):
+    if new == "gif":
+        palette = "palette.png"
+        filters = "fps=30,scale=512:-1:flags=lanczos"
+        
+        # Create palette
+        palette_cmd = f'ffmpeg -v warning -i "{inputt}" -vf "{filters},palettegen" -y {palette}'
+        os.system(palette_cmd)
+        
+        # Create gif using palette
+        cmd = f'ffmpeg -v warning -i "{inputt}" -i {palette} -lavfi "{filters} [x]; [x][1:v] paletteuse" -y "{output}"'
+        
+    elif new in ["mp4", "mkv", "mov"] and not (new == "mov" and ".webm" in inputt):
         cmd = f'ffmpeg -i "{inputt}" -c copy "{output}"'
     else:
         cmd = f'ffmpeg -i "{inputt}" "{output}"'

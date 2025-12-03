@@ -139,14 +139,20 @@ def follow(message,inputt,new,old,oldmessage):
 
 
     # stickers
-    elif output.upper().endswith(IMG) and inputt.upper().endswith("TGS"):
+    elif (output.upper().endswith(IMG) and (inputt.upper().endswith("TGS") or inputt.upper().endswith("WEBM"))):
 
         if new == "webp" or new == "gif" or new == "png":
 
             print("It is Animated Sticker option")
             file = app.download_media(message)
-            srclink = helperfunctions.imageinfo(file)        
-            os.system(f'./tgsconverter "{file}" "{new}"')
+            srclink = helperfunctions.imageinfo(file)
+            if inputt.upper().endswith("TGS"):
+                os.system(f'./tgsconverter "{file}" "{new}"')
+            else: # webm
+                output_name = helperfunctions.updtname(file,new)
+                cmd = helperfunctions.ffmpegcommand(file, output_name, new)
+                os.system(cmd)
+
             os.remove(file)
             output = helperfunctions.updtname(file,new)
             conlink = helperfunctions.imageinfo(output)
@@ -1373,9 +1379,14 @@ async def sticker(client: pyrogram.client.Client, message: pyrogram.types.messag
                      f'Обнаружено расширение: **WEBP** 📷\nТеперь отправьте расширение для конвертации...\n\n--**Доступные форматы**-- \n\n`{IMG_TEXT}`\n\n**СПЕЦИАЛЬНОЕ** 🎁\nColorize, Positive, Upscale & Scan\n\n{message.from_user.mention} выберите или нажмите /cancel для отмены или используйте /rename для переименования',
                      reply_markup=IMGboard, reply_to_message_id=message.id)
     else:
-        await app.send_message(message.chat.id,
-                    f'Обнаружено расширение: **TGS** 📷\nТеперь отправьте расширение для конвертации...\n\n--**Доступные форматы**-- \n\n`{IMG_TEXT}`\n\n**СПЕЦИАЛЬНОЕ** 🎁\nColorize, Positive, Upscale & Scan\n\n{message.from_user.mention} выберите или нажмите /cancel для отмены или используйте /rename для переименования',
-                    reply_markup=IMGboard, reply_to_message_id=message.id)
+        if message.sticker.is_video:
+            await app.send_message(message.chat.id,
+                        f'Обнаружено расширение: **WEBM** 📹 / 🔊\nТеперь отправьте расширение для конвертации...\n\n--**Доступные форматы**-- \n\n`{VA_TEXT}`\n\n{message.from_user.mention} выберите или нажмите /cancel для отмены или используйте /rename для переименования',
+                        reply_markup=VAboard, reply_to_message_id=message.id)
+        else:
+            await app.send_message(message.chat.id,
+                        f'Обнаружено расширение: **TGS** 📷\nТеперь отправьте расширение для конвертации...\n\n--**Доступные форматы**-- \n\n`{IMG_TEXT}`\n\n**СПЕЦИАЛЬНОЕ** 🎁\nColorize, Positive, Upscale & Scan\n\n{message.from_user.mention} выберите или нажмите /cancel для отмены или используйте /rename для переименования',
+                        reply_markup=IMGboard, reply_to_message_id=message.id)
 
 
 # conversion starts here
@@ -1401,6 +1412,7 @@ async def text(client: pyrogram.client.Client, message: pyrogram.types.messages_
         removeSavedMsg(message)
         await app.delete_messages(message.chat.id, message_ids=nmessage.id + 1)
 
+        inputt = ""
         if "COLOR" == message.text:
             if not config['features']['colorize']:
                 await message.reply_text("Эта функция отключена.")
@@ -1409,6 +1421,7 @@ async def text(client: pyrogram.client.Client, message: pyrogram.types.messages_
                                     reply_to_message_id=nmessage.id)
             col = threading.Thread(target=lambda: colorizeimage(nmessage, oldm), daemon=True)
             col.start()
+            return
 
         elif "POSITIVE" == message.text:
             if not config['features']['positive']:
@@ -1418,30 +1431,35 @@ async def text(client: pyrogram.client.Client, message: pyrogram.types.messages_
                                     reply_to_message_id=nmessage.id)
             pos = threading.Thread(target=lambda: negetivetopostive(nmessage, oldm), daemon=True)
             pos.start()
+            return
 
         elif "READ" == message.text:
             oldm = await app.send_message(message.chat.id, 'Чтение файла... 📖',
                                     reply_to_message_id=nmessage.id)
             rf = threading.Thread(target=lambda: readf(nmessage, oldm), daemon=True)
             rf.start()
+            return
 
         elif "SENDPHOTO" == message.text:
             oldm = await app.send_message(message.chat.id, 'Отправка в формате фото... 🖼️',
                                     reply_to_message_id=nmessage.id)
             sp = threading.Thread(target=lambda: sendphoto(nmessage, oldm), daemon=True)
             sp.start()
+            return
 
         elif "SENDDOC" == message.text:
             oldm = await app.send_message(message.chat.id, 'Отправка в формате документа... 📄',
                                      reply_to_message_id=nmessage.id)
             sd = threading.Thread(target=lambda: senddoc(nmessage, oldm), daemon=True)
             sd.start()
+            return
 
         elif "SENDVID" == message.text:
             oldm = await app.send_message(message.chat.id, 'Отправка в потоковом формате... 🎥',
                                      reply_to_message_id=nmessage.id)
             sv = threading.Thread(target=lambda: sendvideo(nmessage, oldm), daemon=True)
             sv.start()
+            return
 
         elif "SpeechToText" == message.text:
             if not config['features']['speech_to_text']:
@@ -1451,6 +1469,7 @@ async def text(client: pyrogram.client.Client, message: pyrogram.types.messages_
                                      reply_to_message_id=nmessage.id)
             stt = threading.Thread(target=lambda: transcript(nmessage, oldm), daemon=True)
             stt.start()
+            return
 
         elif "TextToSpeech" == message.text:
             if not config['features']['text_to_speech']:
@@ -1460,6 +1479,7 @@ async def text(client: pyrogram.client.Client, message: pyrogram.types.messages_
                                     reply_to_message_id=nmessage.id)
             tts = threading.Thread(target=lambda: speak(nmessage, oldm), daemon=True)
             tts.start()
+            return
 
         elif "UPSCALE" == message.text:
             if not config['features']['upscale']:
@@ -1469,18 +1489,21 @@ async def text(client: pyrogram.client.Client, message: pyrogram.types.messages_
                                      reply_to_message_id=nmessage.id)
             upscl = threading.Thread(target=lambda: increaseres(nmessage, oldm), daemon=True)
             upscl.start()
+            return
 
         elif "EXTRACT" == message.text:
             oldm = await app.send_message(message.chat.id, 'Извлечение файла... 📂',
                                     reply_to_message_id=nmessage.id)
             ex = threading.Thread(target=lambda: extract(nmessage, oldm), daemon=True)
             ex.start()
+            return
 
         elif "COMPILE" == message.text:
             oldm = await app.send_message(message.chat.id, 'Компиляция... ⚙️',
                                     reply_to_message_id=nmessage.id)
             cmp = threading.Thread(target=lambda: compile(nmessage, oldm), daemon=True)
             cmp.start()
+            return
 
         elif "SCAN" == message.text:
             if not config['features']['scan']:
@@ -1490,12 +1513,14 @@ async def text(client: pyrogram.client.Client, message: pyrogram.types.messages_
                                     reply_to_message_id=nmessage.id)
             scn = threading.Thread(target=lambda: scan(nmessage, oldm), daemon=True)
             scn.start()
+            return
 
         elif "RUN" == message.text:
             oldm = await app.send_message(message.chat.id, 'Запуск... ▶️',
                                     reply_to_message_id=nmessage.id)
             rpro = threading.Thread(target=lambda: runpro(nmessage, oldm), daemon=True)
             rpro.start()
+            return
 
         elif "BG REMOVE" == message.text:
             if not config['features']['bg_remove']:
@@ -1505,6 +1530,7 @@ async def text(client: pyrogram.client.Client, message: pyrogram.types.messages_
                                     reply_to_message_id=nmessage.id)
             bgrm = threading.Thread(target=lambda: bgremove(nmessage, oldm), daemon=True)
             bgrm.start()
+            return
 
         elif msg_type == "DOCUMENT":
             inputt = nmessage.document.file_name
@@ -1523,7 +1549,9 @@ async def text(client: pyrogram.client.Client, message: pyrogram.types.messages_
             print("File is a Voice")
 
         elif msg_type == "STICKER":
-            if (not nmessage.sticker.is_animated) and (not nmessage.sticker.is_video):
+            if nmessage.sticker.is_video:
+                inputt = nmessage.sticker.set_name + ".webm"
+            elif not nmessage.sticker.is_animated:
                 inputt = nmessage.sticker.set_name + ".webp"
             else:
                 inputt = nmessage.sticker.set_name + ".tgs"
