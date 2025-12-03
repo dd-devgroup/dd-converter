@@ -2,7 +2,7 @@
 
 **Телеграм бот для конвертации изображений, видео, аудио, шрифтов, документов и электронных книг.**
 
-**_Посмотреть бота в действии [@FilesConvertRobot](https://t.me/filesconvertrobot)_**
+**_Посмотреть бота в действии [@DDConverterBot](https://t.me/DDConverterBot)_**
 
 ---
 
@@ -29,8 +29,8 @@ ID=ВАШ_API_ID
 1.  **Установите Docker и Docker Compose.**
 2.  **Склонируйте репозиторий:**
     ```sh
-    git clone https://github.com/bipinkrish/File-Converter-Bot.git
-    cd File-Converter-Bot
+    git clone https://github.com/dd-devgroup/dd-converter.git
+    cd dd-converter
     ```
 3.  **Создайте и заполните `.env` файл**:
     ```sh
