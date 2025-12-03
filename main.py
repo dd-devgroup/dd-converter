@@ -983,17 +983,21 @@ async def help_command(client: pyrogram.client.Client, message: pyrogram.types.m
         help_text += "/guess - 🤔 Бот угадает\n"
     if config['features']['tictactoe']:
         help_text += "/tictactoe - 🕹️ Игра в крестики-нолики\n"
-    help_text += "/source - 👨‍💻 Исходный код на Github"
+    help_text += "/support - 👨‍💻 Поддержка"
     
     oldm = await app.send_message(message.chat.id, help_text, reply_to_message_id=message.id)
     dm = threading.Thread(target=lambda:dltmsg(message,oldm),daemon=True)
     dm.start()
 
 
-#source
-@app.on_message(filters.command(['source']))
-async def source(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    oldm = await app.send_message(message.chat.id, "**GITHUB** - https://github.com/bipinkrish/File-Converter-Bot", disable_web_page_preview=True, reply_to_message_id=message.id)
+#support
+@app.on_message(filters.command(['support']))
+async def support(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    support_channel = config['telegram']['support_channel_id']
+    oldm = await app.send_message(message.chat.id,
+                                  text = f"⚙️ [Поддержка]({support_channel})",
+                                  disable_web_page_preview=True,
+                                  reply_to_message_id=message.id)
     dm = threading.Thread(target=lambda:dltmsg(message,oldm),daemon=True)
     dm.start() 
 
